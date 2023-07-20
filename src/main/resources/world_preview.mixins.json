@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "package": "caeruleusTait.world.preview.mixin",
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "NoiseBasedChunkGeneratorAccessor",
+    "NoiseChunkAccessor",
+    "ReloadableServerResourcesMixin",
+    "StructureTemplatePaletteAccessor",
+    "StructureTemplatePaletteMixin"
+  ],
+  "client": [
+    "client.CreateWorldScreenAccessor",
+    "client.CreateWorldScreenMixin",
+    "client.ScreenAccessor",
+    "client.TabManagerMixin",
+    "client.TabNavigationBarAccessor",
+    "client.WorldTabMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "world_preview.refmap.json"
+}

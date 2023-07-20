@@ -1,0 +1,17 @@
+{
+  "minecraft:end_barrens": {
+    "color": 13602560
+  },
+  "minecraft:end_highlands": {
+    "color": 16772352
+  },
+  "minecraft:end_midlands": {
+    "color": 10921985
+  },
+  "minecraft:the_end": {
+    "color": 12648897
+  },
+  "minecraft:small_end_islands": {
+    "color": 3279414
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "minecraft:ocean_ruin_cold": {
+    "icon": "world_preview:textures/structure/ocean_ruins.png",
+    "name": "Cold Ocean Ruins",
+    "showByDefault": false
+  },
+  "minecraft:ocean_ruin_warm": {
+    "icon": "world_preview:textures/structure/ocean_ruins.png",
+    "name": "Warm Ocean Ruins",
+    "showByDefault": false
+  }
+}

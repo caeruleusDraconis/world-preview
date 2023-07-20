@@ -1,0 +1,7 @@
+{
+  "minecraft:monument": {
+    "icon": "world_preview:textures/structure/ocean_monument.png",
+    "name": "Ocean Monument",
+    "showByDefault": true
+  }
+}

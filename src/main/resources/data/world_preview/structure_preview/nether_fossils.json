@@ -1,0 +1,7 @@
+{
+  "minecraft:nether_fossil": {
+    "icon": "world_preview:textures/structure/nether_fossil.png",
+    "name": "Nether Fossil",
+    "showByDefault": false
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "minecraft:jungle_pyramid": {
+    "icon": "world_preview:textures/structure/jungle_temple.png",
+    "name": "Jungle Temple",
+    "showByDefault": true
+  }
+}

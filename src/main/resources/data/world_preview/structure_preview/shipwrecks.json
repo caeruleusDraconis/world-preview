@@ -1,0 +1,12 @@
+{
+  "minecraft:shipwreck": {
+    "icon": "world_preview:textures/structure/shipwreck.png",
+    "name": "Shipwreck",
+    "showByDefault": false
+  },
+  "minecraft:shipwreck_beached": {
+    "icon": "world_preview:textures/structure/shipwreck_beached.png",
+    "name": "Beached Shipwreck",
+    "showByDefault": false
+  }
+}

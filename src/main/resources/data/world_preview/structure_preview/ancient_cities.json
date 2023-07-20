@@ -1,0 +1,7 @@
+{
+  "minecraft:ancient_city": {
+    "icon": "world_preview:textures/structure/ancient_city.png",
+    "name": "Ancient City",
+    "showByDefault": true
+  }
+}

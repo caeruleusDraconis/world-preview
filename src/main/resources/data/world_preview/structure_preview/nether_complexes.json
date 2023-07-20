@@ -1,0 +1,12 @@
+{
+  "minecraft:fortress": {
+    "icon": "world_preview:textures/structure/nether_fortress.png",
+    "name": "Nether Fortress",
+    "showByDefault": true
+  },
+  "minecraft:bastion_remnant": {
+    "icon": "world_preview:textures/structure/bastion.png",
+    "name": "Bastion Remnant",
+    "showByDefault": true
+  }
+}

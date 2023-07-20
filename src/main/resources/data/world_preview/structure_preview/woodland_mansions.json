@@ -1,0 +1,7 @@
+{
+  "minecraft:mansion": {
+    "icon": "world_preview:textures/structure/mansion.png",
+    "name": "Woodland Mansion",
+    "showByDefault": true
+  }
+}

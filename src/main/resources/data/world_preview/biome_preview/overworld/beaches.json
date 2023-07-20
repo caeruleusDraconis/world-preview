@@ -1,0 +1,11 @@
+{
+  "minecraft:beach": {
+    "color": 16051717
+  },
+  "minecraft:stony_shore": {
+    "color": 5729156
+  },
+  "minecraft:snowy_beach": {
+    "color": 16383894
+  }
+}

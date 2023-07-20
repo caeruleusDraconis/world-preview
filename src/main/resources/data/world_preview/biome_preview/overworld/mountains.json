@@ -1,0 +1,14 @@
+{
+  "minecraft:snowy_slopes": {
+    "color": 16770724
+  },
+  "minecraft:stony_peaks": {
+    "color": 11988220
+  },
+  "minecraft:jagged_peaks": {
+    "color": 6661807
+  },
+  "minecraft:frozen_peaks": {
+    "color": 10547447
+  }
+}

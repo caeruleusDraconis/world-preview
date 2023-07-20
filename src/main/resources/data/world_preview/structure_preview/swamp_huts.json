@@ -1,0 +1,7 @@
+{
+  "minecraft:swamp_hut": {
+    "icon": "world_preview:textures/structure/swamp_hut.png",
+    "name": "Swamp Hut",
+    "showByDefault": true
+  }
+}

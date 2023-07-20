@@ -1,0 +1,7 @@
+{
+  "minecraft:buried_treasure": {
+    "icon": "world_preview:textures/structure/chest.png",
+    "name": "Buried Treasure",
+    "showByDefault": false
+  }
+}

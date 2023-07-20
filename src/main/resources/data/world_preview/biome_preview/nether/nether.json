@@ -1,0 +1,17 @@
+{
+  "minecraft:crimson_forest": {
+    "color": 16515085
+  },
+  "minecraft:warped_forest": {
+    "color": 1025928
+  },
+  "minecraft:basalt_deltas": {
+    "color": 13671748
+  },
+  "minecraft:nether_wastes": {
+    "color": 8454145
+  },
+  "minecraft:soul_sand_valley": {
+    "color": 8880204
+  }
+}

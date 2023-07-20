@@ -1,0 +1,7 @@
+{
+  "minecraft:igloo": {
+    "icon": "world_preview:textures/structure/igloo.png",
+    "name": "Igloo",
+    "showByDefault": true
+  }
+}
