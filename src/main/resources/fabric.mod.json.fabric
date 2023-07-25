@@ -9,8 +9,9 @@
 		"Taiterio"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://modrinth.com/mod/world-preview",
+		"sources": "https://github.com/caeruleusDraconis/world-preview",
+		"issues": "https://github.com/caeruleusDraconis/world-preview/issues"
 	},
 	"license": "Apache-2.0",
 	"icon": "assets/world_preview/icon.png",

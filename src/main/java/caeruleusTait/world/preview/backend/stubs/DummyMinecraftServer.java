@@ -9,9 +9,11 @@ import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.Proxy;
+import java.util.UUID;
 
 public class DummyMinecraftServer extends MinecraftServer {
     public DummyMinecraftServer(
@@ -25,6 +27,9 @@ public class DummyMinecraftServer extends MinecraftServer {
             ChunkProgressListenerFactory chunkProgressListenerFactory
     ) {
         super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, services, chunkProgressListenerFactory);
+        this.setSingleplayerProfile(new GameProfile(UUID.randomUUID(), "world-preview"));
+        this.setDemo(false);
+        this.setPlayerList(new DummyPlayerList(this, this.registries(), this.playerDataStorage, 1));
     }
 
     @Override
@@ -48,8 +53,8 @@ public class DummyMinecraftServer extends MinecraftServer {
     }
 
     @Override
-    public SystemReport fillServerSystemReport(SystemReport report) {
-        return null;
+    public @NotNull SystemReport fillServerSystemReport(@NotNull SystemReport report) {
+        return report;
     }
 
     @Override
@@ -83,7 +88,7 @@ public class DummyMinecraftServer extends MinecraftServer {
     }
 
     @Override
-    public boolean isSingleplayerOwner(GameProfile profile) {
+    public boolean isSingleplayerOwner(@NotNull GameProfile profile) {
         return false;
     }
 }
