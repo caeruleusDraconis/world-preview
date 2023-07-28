@@ -2,7 +2,7 @@
 
 *World Preview* is a mod for visualizing Minecraft world seeds before they are generated.
 
-Find us on [modrinth](https://modrinth.com/mod/world-gen) and [CurseForge](https://www.curseforge.com/minecraft/mc-mods/world-preview)!
+Find us on [modrinth](https://modrinth.com/mod/world-preview/) and [CurseForge](https://www.curseforge.com/minecraft/mc-mods/world-preview)!
 
 ## Installation
 
