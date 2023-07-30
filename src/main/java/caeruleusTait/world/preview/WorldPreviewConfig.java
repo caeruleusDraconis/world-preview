@@ -15,6 +15,7 @@ public class WorldPreviewConfig {
     public boolean sampleHeightmap = false;
     public int heightmapMinY = 32;
     public int heightmapMaxY = 255;
+    public boolean onlySampleInVisualRange = true;
     public String colorMap = "world_preview:inferno";
 
     private int numThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);

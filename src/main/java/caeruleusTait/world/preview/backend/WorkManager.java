@@ -424,6 +424,10 @@ public class WorkManager {
         return executorService != null;
     }
 
+    public WorldPreviewConfig config() {
+        return config;
+    }
+
     /**
      * This resource manager can access images in datapacks, while the
      * one provided in the GUI Minecraft class can't.

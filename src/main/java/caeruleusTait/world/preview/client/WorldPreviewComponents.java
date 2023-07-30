@@ -58,6 +58,8 @@ public class WorldPreviewComponents {
     public static final Component SETTINGS_HEIGHTMAP_MAX_Y = Component.translatable("world_preview.settings.heightmap.maxY");
     public static final Component SETTINGS_HEIGHTMAP_MIN_Y_TOOLTIP = Component.translatable("world_preview.settings.heightmap.minY.tooltip");
     public static final Component SETTINGS_HEIGHTMAP_MAX_Y_TOOLTIP = Component.translatable("world_preview.settings.heightmap.maxY.tooltip");
+    public static final Component SETTINGS_HEIGHTMAP_VISUAL = Component.translatable("world_preview.settings.heightmap.visual");
+    public static final Component SETTINGS_HEIGHTMAP_VISUAL_TOOLTIP = Component.translatable("world_preview.settings.heightmap.visual.tooltip");
 
     // - Dimensions settings
     public static final Component SETTINGS_DIM_TITLE = Component.translatable("world_preview.settings.dimensions.title");

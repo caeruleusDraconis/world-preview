@@ -5,6 +5,7 @@ import caeruleusTait.world.preview.WorldPreviewConfig;
 import caeruleusTait.world.preview.backend.color.ColorMap;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.client.WorldPreviewClient;
+import caeruleusTait.world.preview.client.gui.widgets.WGCheckbox;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
 import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BaseObjectSelectionList;
@@ -48,6 +49,8 @@ public class HeightmapTab implements Tab {
     private final WGLabel minYLabel;
     private final WGLabel maxYLabel;
 
+    private final WGCheckbox visualYRange;
+
     private final WGLabel colormapHead;
     private final ColormapList colormapList;
     private final AbstractSelectionListHolder<ColormapList.ColormapEntry, ColormapList> colormapListHolder;
@@ -85,6 +88,10 @@ public class HeightmapTab implements Tab {
         maxYLabel.setTooltip(Tooltip.create(SETTINGS_HEIGHTMAP_MAX_Y_TOOLTIP));
         toRender.add(minYLabel);
         toRender.add(maxYLabel);
+
+        visualYRange = new WGCheckbox(0, 0, 100, LINE_HEIGHT, SETTINGS_HEIGHTMAP_VISUAL, x -> cfg.onlySampleInVisualRange = x.selected(), cfg.onlySampleInVisualRange);
+        visualYRange.setTooltip(Tooltip.create(SETTINGS_HEIGHTMAP_VISUAL_TOOLTIP));
+        toRender.add(visualYRange);
 
         heightPresetList = new HeightPresetList(minecraft, 100, 100, 0, 0);
         heightPresetList.replaceEntries(
@@ -162,6 +169,12 @@ public class HeightmapTab implements Tab {
         // LEFT COLUMN
         //  - BOTTOM
         final int labelWidth = 100;
+
+        visualYRange.setPosition(leftL, bottomL);
+        visualYRange.setWidth(secWidth);
+
+        //      New line
+        bottomL -= (LINE_HEIGHT + LINE_VSPACE);
         maxYLabel.setPosition(leftL, bottomL);
         maxYLabel.setWidth(labelWidth);
 

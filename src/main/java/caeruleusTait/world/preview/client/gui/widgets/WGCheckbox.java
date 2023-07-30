@@ -13,13 +13,13 @@ public class WGCheckbox extends Checkbox {
 
     private final OnPress cb;
 
-    public WGCheckbox(int i, int j, int k, int l, Component component, OnPress onPress, boolean bl) {
-        super(i, j, k, l, component, bl);
+    public WGCheckbox(int x, int y, int width, int height, Component component, OnPress onPress, boolean selected) {
+        super(x, y, width, height, component, selected);
         cb = onPress;
     }
 
-    public WGCheckbox(int i, int j, int k, int l, Component component, OnPress onPress, boolean bl, boolean bl2) {
-        super(i, j, k, l, component, bl, bl2);
+    public WGCheckbox(int x, int y, int width, int height, Component component, OnPress onPress, boolean selected, boolean showLabel) {
+        super(x, y, width, height, component, selected, showLabel);
         cb = onPress;
     }
 

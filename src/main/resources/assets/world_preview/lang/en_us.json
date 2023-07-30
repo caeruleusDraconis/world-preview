@@ -62,6 +62,8 @@
   "world_preview.settings.heightmap.maxY": "Higher y-value",
   "world_preview.settings.heightmap.minY.tooltip": "This value corresponds to the §lleft§r-most color on the colormap.\n\nAny y-values §llower§r than it will remain that color.",
   "world_preview.settings.heightmap.maxY.tooltip": "This value corresponds to the §lright§r-most color on the colormap.\n\nAny y-values §lhigher§r than it will remain that color",
+  "world_preview.settings.heightmap.visual": "Only sample in y-range",
+  "world_preview.settings.heightmap.visual.tooltip": "Only sample for height values in the given y-range. This will improve performance at the cost of not showing the correct y-value for terrain outside the given range.",
   "world_preview.settings.dimensions.title": "Dimensions",
   "world_preview.settings.dimensions.head": "Select the dimension to generate the preview for",
   "world_preview.settings.biomes.title": "Biomes",

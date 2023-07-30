@@ -1,5 +1,6 @@
 package caeruleusTait.world.preview.backend.worker;
 
+import caeruleusTait.world.preview.WorldPreviewConfig;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.sampler.ChunkSampler;
 import caeruleusTait.world.preview.backend.storage.PreviewStorage;
@@ -33,6 +34,7 @@ public class HeightmapWorkUnit extends WorkUnit {
     protected List<WorkResult> doWork() {
         final WorkResult res = new WorkResult(this, QuartPos.fromBlock(0), primarySection, new ArrayList<>(numChunks * numChunks * 4 * 4), List.of());
         final NoiseGeneratorSettings noiseGeneratorSettings = sampleUtils.noiseGeneratorSettings();
+        final WorldPreviewConfig config = workManager.config();
 
         if (noiseGeneratorSettings == null) {
             return List.of(res);
@@ -45,9 +47,11 @@ public class HeightmapWorkUnit extends WorkUnit {
         final int cellWidth = noiseSettings.getCellWidth();
         final int cellHeight = noiseSettings.getCellHeight();
 
-        final int minY = noiseSettings.minY();
+        final int minY = config.onlySampleInVisualRange ? config.heightmapMinY : noiseSettings.minY();
+        final int maxY = config.onlySampleInVisualRange ? config.heightmapMaxY : minY + noiseSettings.height();
         final int cellMinY = Mth.floorDiv(minY, noiseSettings.getCellHeight());
-        final int cellCountY = Mth.floorDiv(noiseSettings.height(), noiseSettings.getCellHeight());
+        final int cellCountY = Mth.floorDiv(maxY - minY, noiseSettings.getCellHeight());
+        final int cellOffsetY = config.onlySampleInVisualRange ? cellMinY -  Mth.floorDiv(noiseSettings.minY(), noiseSettings.getCellHeight()): 0;
 
         final int minBlockX = chunkPos.getMinBlockX();
         final int minBlockZ = chunkPos.getMinBlockZ();
@@ -79,7 +83,7 @@ public class HeightmapWorkUnit extends WorkUnit {
                     }
 
                     for(int cellY = cellCountY - 1; cellY >= 0 && !positions.isEmpty() && !isCanceled(); --cellY) {
-                        noiseChunk.selectCellYZ(cellY, cellZ);
+                        noiseChunk.selectCellYZ(cellY + cellOffsetY, cellZ);
 
                         // Iterate over block in cell Y X Z
                         for (int yInCell = cellHeight - 1; yInCell >= 0 && !positions.isEmpty(); --yInCell) {
