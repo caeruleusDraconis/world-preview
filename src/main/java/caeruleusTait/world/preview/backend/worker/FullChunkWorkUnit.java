@@ -33,7 +33,7 @@ public class FullChunkWorkUnit extends WorkUnit {
             WorkResult res = new WorkResult(
                     this,
                     QuartPos.fromBlock(y),
-                    y == this.y ? primarySection : storage.section4(chunkPos, y, PreviewStorage.FLAG_BIOME),
+                    y == this.y ? primarySection : storage.section4(chunkPos, y, flags()),
                     new ArrayList<>(16),
                     List.of()
             );

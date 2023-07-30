@@ -41,6 +41,7 @@ public class GeneralTab extends GridLayoutTab {
         WGCheckbox cbFc = new WGCheckbox(0, 0, LINE_WIDTH, LINE_HEIGHT, SETTINGS_GENERAL_FC, x -> cfg.buildFullVertChunk = x.selected(), cfg.buildFullVertChunk);
         WGCheckbox cbStruct = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_STRUCT, x -> cfg.sampleStructures = x.selected(), cfg.sampleStructures);
         WGCheckbox cbHm = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_HEIGHTMAP, x -> cfg.sampleHeightmap = x.selected(), cfg.sampleHeightmap);
+        WGCheckbox cbInt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_INTERSECT, x -> cfg.sampleIntersections = x.selected(), cfg.sampleIntersections);
         WGCheckbox cbCtrl = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_CONTROLS, x -> cfg.showControls = x.selected(), cfg.showControls);
         WGCheckbox cbFt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_FRAMETIME, x -> cfg.showFrameTime = x.selected(), cfg.showFrameTime);
 
@@ -49,6 +50,7 @@ public class GeneralTab extends GridLayoutTab {
         cbBg.setTooltip(Tooltip.create(SETTINGS_GENERAL_BG_TOOLTIP));
         cbStruct.setTooltip(Tooltip.create(SETTINGS_GENERAL_STRUCT_TOOLTIP));
         cbHm.setTooltip(Tooltip.create(SETTINGS_GENERAL_HEIGHTMAP_TOOLTIP));
+        cbInt.setTooltip(Tooltip.create(SETTINGS_GENERAL_INTERSECT_TOOLTIP));
         cbCtrl.setTooltip(Tooltip.create(SETTINGS_GENERAL_CONTROLS_TOOLTIP));
         cbFt.setTooltip(Tooltip.create(SETTINGS_GENERAL_FRAMETIME_TOOLTIP));
 
@@ -59,6 +61,7 @@ public class GeneralTab extends GridLayoutTab {
         rowHelper.addChild(cbBg, 2);
         rowHelper.addChild(cbStruct, 1);
         rowHelper.addChild(cbHm, 1);
+        rowHelper.addChild(cbInt, 1);
         rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, 200, LINE_HEIGHT / 3, WGLabel.TextAlignment.CENTER, Component.literal(""), 0xFFFFFF), 2);
         rowHelper.addChild(cbCtrl);
         rowHelper.addChild(cbFt);

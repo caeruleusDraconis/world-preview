@@ -26,6 +26,7 @@ public class PreviewStorage {
     public static final long FLAG_BIOME = 0b0000;
     public static final long FLAG_STRUCT_START = 0b0001;
     public static final long FLAG_HEIGHT = 0b0010;
+    public static final long FLAG_INTERSECT = 0b0011;
     public static final long FLAG_STRUCT_REF = 0b1111;
 
     private final Long2ObjectMap<PreviewSection>[] sections;

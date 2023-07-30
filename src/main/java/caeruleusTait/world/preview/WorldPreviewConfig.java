@@ -13,6 +13,7 @@ public class WorldPreviewConfig {
     public boolean backgroundSampleVertChunk = false;
     public boolean sampleStructures = false;
     public boolean sampleHeightmap = false;
+    public boolean sampleIntersections = false;
     public int heightmapMinY = 32;
     public int heightmapMaxY = 255;
     public boolean onlySampleInVisualRange = true;

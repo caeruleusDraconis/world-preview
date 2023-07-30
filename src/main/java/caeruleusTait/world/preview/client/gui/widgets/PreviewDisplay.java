@@ -273,6 +273,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         synchronized (storage) {
             while (true) {
                 long flag = renderSettings.showHeightMap ? PreviewStorage.FLAG_HEIGHT : PreviewStorage.FLAG_BIOME;
+                flag = renderSettings.showIntersections ? PreviewStorage.FLAG_INTERSECT : flag;
                 int useY = renderSettings.showHeightMap ? 0 : quartY;
                 PreviewSection dataSection = storage.section4(quartX, useY, quartZ, flag);
                 PreviewSection structureSection = storage.section4(quartX, 0, quartZ, PreviewStorage.FLAG_STRUCT_START);
@@ -328,7 +329,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                     // Read the biome data
                     short rawData = r.dataSection.get(x, z);
                     int color = 0xFF000000;
-                    if (rawData >= 0 && !renderSettings.showHeightMap) {
+                    if (rawData >= 0 && !renderSettings.showHeightMap && !renderSettings.showIntersections) {
                         color = selectedBiomeId >= 0 || highlightCaves ? colorMapGrayScale[rawData] : colorMap[rawData];
                         if (selectedBiomeId == rawData || (highlightCaves && cavesMap[rawData])) {
                             color = colorMap[rawData];
@@ -336,6 +337,12 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                         workingVisibleBiomes[rawData] += 1;
                     } else if (rawData > Short.MIN_VALUE && renderSettings.showHeightMap) {
                         color = heightColorMap[rawData - dataProvider.yMin()];
+                    } else if (renderSettings.showIntersections) {
+                        color = switch (rawData) {
+                            case 0 -> 0xFF000000;
+                            case 1 -> 0xFFFFFFFF;
+                            default -> 0xFF888888;
+                        };
                     }
 
                     // Draw

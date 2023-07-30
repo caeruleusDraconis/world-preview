@@ -23,6 +23,7 @@ public class RenderSettings {
 
     public boolean hideAllStructures = false;
     public boolean showHeightMap = false;
+    public boolean showIntersections = false;
 
     public BlockPos center() {
         return center;

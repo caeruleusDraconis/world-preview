@@ -19,6 +19,8 @@ public class WorldPreviewComponents {
     public static final Component BTN_RESET_STRUCTURES_DISABLED = Component.translatable("world_preview.preview.btn-reset-structures.disabled");
     public static final Component BTN_TOGGLE_HEIGHTMAP = Component.translatable("world_preview.preview.btn-toggle-heightmap");
     public static final Component BTN_TOGGLE_HEIGHTMAP_DISABLED = Component.translatable("world_preview.preview.btn-toggle-heightmap.disabled");
+    public static final Component BTN_TOGGLE_INTERSECT = Component.translatable("world_preview.preview.btn-toggle-intersect");
+    public static final Component BTN_TOGGLE_INTERSECT_DISABLED = Component.translatable("world_preview.preview.btn-toggle-intersect.disabled");
 
     // Settings
     public static final Component SETTINGS_TITLE = Component.translatable("world_preview.settings.title");
@@ -33,6 +35,8 @@ public class WorldPreviewComponents {
     public static final Component SETTINGS_GENERAL_STRUCT_TOOLTIP = Component.translatable("world_preview.settings.general.struct.tooltip");
     public static final Component SETTINGS_GENERAL_HEIGHTMAP = Component.translatable("world_preview.settings.general.heightmap");
     public static final Component SETTINGS_GENERAL_HEIGHTMAP_TOOLTIP = Component.translatable("world_preview.settings.general.heightmap.tooltip");
+    public static final Component SETTINGS_GENERAL_INTERSECT = Component.translatable("world_preview.settings.general.intersect");
+    public static final Component SETTINGS_GENERAL_INTERSECT_TOOLTIP = Component.translatable("world_preview.settings.general.intersect.tooltip");
     public static final Component SETTINGS_GENERAL_FC_TOOLTIP = Component.translatable("world_preview.settings.general.full.chunk.tooltip");
     public static final Component SETTINGS_GENERAL_BG = Component.translatable("world_preview.settings.general.background");
     public static final Component SETTINGS_GENERAL_BG_TOOLTIP = Component.translatable("world_preview.settings.general.background.tooltip");

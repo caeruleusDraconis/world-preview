@@ -250,6 +250,10 @@ public class SampleUtils implements AutoCloseable {
         );
     }
 
+    public NoiseColumn doIntersectionsSlow(BlockPos pos) {
+        return chunkGenerator.getBaseColumn(pos.getX(), pos.getZ(), levelHeightAccessor, randomState);
+    }
+
     /*
     public void doStructureRefs(ChunkPos chunkPos) {
         ProtoChunk protoChunk = (ProtoChunk) previewLevel.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);

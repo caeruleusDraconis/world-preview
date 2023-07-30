@@ -91,6 +91,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
     private final ToggleButton toggleCaves;
     private final ToggleButton toggleShowStructures;
     private final ToggleButton toggleHeightmap;
+    private final ToggleButton toggleIntersections;
     private final Button resetDefaultStructureVisibility;
     private final Button switchBiomes;
     private final Button switchStructures;
@@ -247,11 +248,33 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
                 0, 0, 20, 20, /* x, y, width, height */
                 200, 20, 20, 20, /* xTexStart, yTexStart, xDiffTex, yDiffTex */
                 BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
-                x -> renderSettings.showHeightMap = ((ToggleButton) x).selected
+                x -> {
+                    renderSettings.showHeightMap = ((ToggleButton) x).selected;
+                    if (renderSettings.showHeightMap) {
+                        renderSettings.showIntersections = false;
+                        toggleIntersections().selected = false;
+                    }
+                }
         );
         toggleHeightmap.selected = false;
         toggleHeightmap.active = false;
         toRender.add(toggleHeightmap);
+
+        toggleIntersections = new ToggleButton(
+                0, 0, 20, 20, /* x, y, width, height */
+                240, 20, 20, 20, /* xTexStart, yTexStart, xDiffTex, yDiffTex */
+                BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
+                x -> {
+                    renderSettings.showIntersections = ((ToggleButton) x).selected;
+                    if (renderSettings.showIntersections) {
+                        renderSettings.showHeightMap = false;
+                        toggleHeightmap().selected = false;
+                    }
+                }
+        );
+        toggleIntersections.selected = false;
+        toggleIntersections.active = false;
+        toRender.add(toggleIntersections);
 
         biomesList.setBiomeChangeListener(x -> {
             previewDisplay.setSelectedBiomeId(x == null ? -1 : x.id());
@@ -529,6 +552,15 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
             renderSettings.showHeightMap = false;
         }
 
+        if (cfg.sampleIntersections) {
+            toggleIntersections.active = true;
+            toggleIntersections.setTooltip(Tooltip.create(BTN_TOGGLE_INTERSECT));
+        } else {
+            toggleIntersections.active = false;
+            toggleIntersections.setTooltip(Tooltip.create(BTN_TOGGLE_INTERSECT_DISABLED));
+            renderSettings.showIntersections = false;
+        }
+
         previewDisplay.reloadData();
         previewDisplay.setSelectedBiomeId((short) -1);
         previewDisplay.setHighlightCaves(false);
@@ -688,11 +720,12 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         saveSeed.setY(bottom);
 
         // TOP
-        int cycleWith = leftWidth - 22 * 5;
+        int cycleWith = leftWidth - 22 * 6;
 
         int btnStart = left + cycleWith + 2;
         settings.setPosition(left, top);
         int i = 0;
+        toggleIntersections.setPosition(btnStart + 22 * i++, top);
         toggleHeightmap.setPosition(btnStart + 22 * i++, top);
         resetDefaultStructureVisibility.setPosition(btnStart + 22 * i++, top);
         toggleShowStructures.setPosition(btnStart + 22 * i++, top);
@@ -807,6 +840,22 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
     @Override
     public boolean isUpdating() {
         return isUpdating;
+    }
+
+    public ToggleButton toggleCaves() {
+        return toggleCaves;
+    }
+
+    public ToggleButton toggleShowStructures() {
+        return toggleShowStructures;
+    }
+
+    public ToggleButton toggleHeightmap() {
+        return toggleHeightmap;
+    }
+
+    public ToggleButton toggleIntersections() {
+        return toggleIntersections;
     }
 
     public enum DisplayType {

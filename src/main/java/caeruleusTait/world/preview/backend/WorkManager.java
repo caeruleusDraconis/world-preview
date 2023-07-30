@@ -291,6 +291,23 @@ public class WorkManager {
             units += queueForLevel(chunks, 0, 64, (pos, y) -> new SlowHeightmapWorkUnit(chunkSampler, sampleUtils, pos, previewData));
         }
 
+        // Intersections
+        if (config.sampleIntersections && !shouldEarlyAbortQueuing && sampleUtils.noiseGeneratorSettings() != null) {
+            LongSet queuedChunks = new LongOpenHashSet(chunks.size());
+            List<ChunkPos> intersectChunks = new ArrayList<>(chunks.size());
+            final int sectionSizeExponent = PreviewSection.SHIFT - PreviewSection.QUART_TO_SECTION_SHIFT;
+            final int numChunks = PreviewSection.SECTION_SIZE >> (sectionSizeExponent - 4);
+            for (ChunkPos c : chunks) {
+                ChunkPos shifted = new ChunkPos((c.x >> 4) << 4, (c.z >> 4) << 4);
+                if (queuedChunks.add(shifted.toLong())) {
+                    intersectChunks.add(shifted);
+                }
+            }
+            units += queueForLevel(intersectChunks, 0, 1, (pos, y) -> new IntersectionWorkUnit(chunkSampler, sampleUtils, pos, numChunks, previewData, Y_BLOCK_STRIDE));
+        } else if (config.sampleIntersections && !shouldEarlyAbortQueuing) {
+            units += queueForLevel(chunks, 0, 64, (pos, y) -> new SlowIntersectionWorkUnit(chunkSampler, sampleUtils, pos, previewData, yMin(), yMax(), Y_BLOCK_STRIDE));
+        }
+
         // Now sample adjacent levels
         if (config.backgroundSampleVertChunk && !config.buildFullVertChunk) {
             for (int y : genAdjacentYLevels(topLeftBlock.getY())) {
