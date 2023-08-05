@@ -445,7 +445,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     }
 
     private HoverInfo hoveredBiome(double mouseX, double mouseY) {
-        if (!isHovered) {
+        if (!isHovered || workManager.previewStorage() == null) {
             return null;
         }
         int guiScale = (int) minecraft.getWindow().getGuiScale();
