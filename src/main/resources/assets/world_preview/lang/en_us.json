@@ -38,7 +38,7 @@
   "world_preview.settings.general.heightmap": "Sample for height",
   "world_preview.settings.general.heightmap.tooltip": "Whether to generate a heightmap for the dimension\n\n§cHIGH performance impact§r",
   "world_preview.settings.general.intersect": "Sample y-intersections",
-  "world_preview.settings.general.intersect.tooltip": "Whether to sample the locations of opaque and air blocks, to highlight caves and mountains\n\n§cHIGH performance impact§r",
+  "world_preview.settings.general.intersect.tooltip": "Whether to sample the locations of opaque and air blocks, to highlight caves and mountains.\n\nThis is done §lBEFORE§r the world is carved, so this will be inaccurate!\n\n§cHIGH performance impact§r",
   "world_preview.settings.general.controls": "Show controls in tooltip",
   "world_preview.settings.general.controls.tooltip": "Show the controls in the preview tooltip",
   "world_preview.settings.general.frametime": "Show frame time",
