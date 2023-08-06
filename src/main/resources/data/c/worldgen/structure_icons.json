@@ -1,15 +1,12 @@
 {
   "minecraft:swamp_hut": {
-    "texture": "world_preview:textures/structure/swamp_hut.png",
-    "name": "Swamp Hut"
+    "texture": "world_preview:textures/structure/swamp_hut.png"
   },
   "minecraft:ancient_city": {
-    "texture": "world_preview:textures/structure/ancient_city.png",
-    "name": "Ancient City"
+    "texture": "world_preview:textures/structure/ancient_city.png"
   },
   "minecraft:ruined_portal": {
-    "texture": "world_preview:textures/structure/ruined_portal.png",
-    "name": "Ruined Portal"
+    "texture": "world_preview:textures/structure/ruined_portal.png"
   },
   "minecraft:ruined_portal_desert": {
     "texture": "world_preview:textures/structure/ruined_portal.png",
@@ -48,44 +45,36 @@
     "name": "Woodland Mansion"
   },
   "minecraft:buried_treasure": {
-    "texture": "world_preview:textures/structure/chest.png",
-    "name": "Buried Treasure"
+    "texture": "world_preview:textures/structure/chest.png"
   },
   "minecraft:shipwreck": {
-    "texture": "world_preview:textures/structure/shipwreck.png",
-    "name": "Shipwreck"
+    "texture": "world_preview:textures/structure/shipwreck.png"
   },
   "minecraft:shipwreck_beached": {
     "texture": "world_preview:textures/structure/shipwreck_beached.png",
     "name": "Beached Shipwreck"
   },
   "minecraft:pillager_outpost": {
-    "texture": "world_preview:textures/structure/pillager_outpost.png",
-    "name": "Pillager Outpost"
+    "texture": "world_preview:textures/structure/pillager_outpost.png"
   },
   "minecraft:trail_ruins": {
-    "texture": "world_preview:textures/structure/trail_ruins.png",
-    "name": "Trail Ruins"
+    "texture": "world_preview:textures/structure/trail_ruins.png"
   },
   "minecraft:nether_fossil": {
-    "texture": "world_preview:textures/structure/nether_fossil.png",
-    "name": "Nether Fossil"
+    "texture": "world_preview:textures/structure/nether_fossil.png"
   },
   "minecraft:end_city": {
-    "texture": "world_preview:textures/structure/end_city.png",
-    "name": "End City"
+    "texture": "world_preview:textures/structure/end_city.png"
   },
   "minecraft:desert_pyramid": {
     "texture": "world_preview:textures/structure/desert_temple.png",
     "name": "Desert Temple"
   },
   "minecraft:stronghold": {
-    "texture": "world_preview:textures/structure/stronghold2.png",
-    "name": "Stronghold"
+    "item": "minecraft:ender_eye"
   },
   "minecraft:igloo": {
-    "texture": "world_preview:textures/structure/igloo.png",
-    "name": "Igloo"
+    "texture": "world_preview:textures/structure/igloo.png"
   },
   "minecraft:ocean_ruin_cold": {
     "texture": "world_preview:textures/structure/ocean_ruins.png",
@@ -96,8 +85,7 @@
     "name": "Warm Ocean Ruins"
   },
   "minecraft:mineshaft": {
-    "texture": "world_preview:textures/structure/mineshaft.png",
-    "name": "Mineshaft"
+    "texture": "world_preview:textures/structure/mineshaft.png"
   },
   "minecraft:mineshaft_mesa": {
     "texture": "world_preview:textures/structure/mineshaft.png",
@@ -108,8 +96,7 @@
     "name": "Nether Fortress"
   },
   "minecraft:bastion_remnant": {
-    "texture": "world_preview:textures/structure/bastion.png",
-    "name": "Bastion Remnant"
+    "texture": "world_preview:textures/structure/bastion.png"
   },
   "minecraft:village_plains": {
     "texture": "world_preview:textures/structure/village_plains.png",
