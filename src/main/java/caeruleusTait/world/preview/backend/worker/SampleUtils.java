@@ -256,19 +256,6 @@ public class SampleUtils implements AutoCloseable {
         return chunkGenerator.getBaseColumn(pos.getX(), pos.getZ(), levelHeightAccessor, randomState);
     }
 
-    /*
-    public void doStructureRefs(ChunkPos chunkPos) {
-        ProtoChunk protoChunk = (ProtoChunk) previewLevel.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false);
-        chunkGenerator.createReferences(previewLevel, structureManager, protoChunk);
-        Map<Structure, LongSet> refs = protoChunk.getAllReferences();
-        Registry<Structure> structureRegistry = registryAccess.registryOrThrow(Registries.STRUCTURE);
-        for (Structure x : refs.keySet()) {
-            ResourceLocation structName = structureRegistry.getKey(x);
-            LOGGER.info("[{} x {}] | {}", chunkPos.x, chunkPos.z, structName);
-        }
-    }
-     */
-
     @Override
     public void close() throws Exception {
         // FileUtils.deleteDirectory(tempDir.toFile());

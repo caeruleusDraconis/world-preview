@@ -128,32 +128,6 @@ public class IntersectionWorkUnit extends WorkUnit {
                             sampler.expandRaw(mutableBlockPos, (short) blockState.getMapColor(null, null).id, res);
                         }
                     }
-
-                    /*
-                    for(int cellY = cellCountY - 1; cellY >= 0 && !positions.isEmpty() && !isCanceled(); --cellY) {
-                        noiseChunk.selectCellYZ(cellY, cellZ);
-
-                        // Iterate over block in cell Y X Z
-                        for (int yInCell = cellHeight - 1; yInCell >= 0 && !positions.isEmpty(); yInCell -= yStride) {
-                            final int y = (cellMinY + cellY) * cellHeight + yInCell;
-                            final WorkResult res = results.get((y - yMin) / yStride);
-                            noiseChunk.updateForY(y, (double) yInCell / (double) cellHeight);
-
-                            for (XZPair curr : positions) {
-                                noiseChunk.updateForX(curr.x, curr.dX);
-                                noiseChunk.updateForZ(curr.z, curr.dZ);
-
-                                BlockState blockState = ((NoiseChunkAccessor) noiseChunk).invokeGetInterpolatedState();
-                                if (blockState == null) {
-                                    blockState = noiseGeneratorSettings.defaultBlock();
-                                }
-
-                                mutableBlockPos.set(curr.x, y, curr.z);
-                                sampler.expandRaw(mutableBlockPos, (short) (predicate.test(blockState) ? 0 : 1), res);
-                            }
-                        }
-                    }
-                     */
                 }
 
                 // Whatever this does, but it is required...

@@ -357,7 +357,6 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                         color = heightColorMap[rawData - dataProvider.yMin()];
                     } else if (renderSettings.showIntersections && rawData >= 0) {
                         color = MapColor.byId(rawData).col;
-                        // RGBA --> ARGB
                         color = textureColor(color == 0 ? 0xFFFFFF : color);
                     }
 
