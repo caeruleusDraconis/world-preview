@@ -2,6 +2,7 @@ package caeruleusTait.world.preview.backend.worker;
 
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.sampler.ChunkSampler;
+import caeruleusTait.world.preview.backend.storage.PreviewSection;
 import caeruleusTait.world.preview.backend.storage.PreviewStorage;
 import caeruleusTait.world.preview.mixin.NoiseChunkAccessor;
 import net.minecraft.core.BlockPos;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.levelgen.NoiseSettings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 public class IntersectionWorkUnit extends WorkUnit {
@@ -37,7 +39,7 @@ public class IntersectionWorkUnit extends WorkUnit {
         this.yStride = yStride;
     }
 
-    private record XZPair(int x, double dX, int z, double dZ) {
+    private record XZPair(int x, double dX, int z, double dZ, AtomicInteger mutableLastValue) {
         // record
     }
 
@@ -98,7 +100,8 @@ public class IntersectionWorkUnit extends WorkUnit {
                             int z = minBlockZ + cellZ * cellWidth + zInCell;
                             positions.add(new XZPair(
                                     x, (double) xInCell / (double) cellWidth,
-                                    z, (double) zInCell / (double) cellWidth
+                                    z, (double) zInCell / (double) cellWidth,
+                                    new AtomicInteger(0)
                             ));
                         }
                     }
@@ -124,8 +127,16 @@ public class IntersectionWorkUnit extends WorkUnit {
                                 blockState = noiseGeneratorSettings.defaultBlock();
                             }
 
+                            short colorId = (short) blockState.getMapColor(null, null).id;
+                            short lastId = (short) curr.mutableLastValue.getAndSet(colorId);
+
+                            // Allow "seeing through" one layer of air
+                            if (colorId == 0 && lastId > 0) {
+                                colorId = (short) -lastId;
+                            }
+
                             mutableBlockPos.set(curr.x, yTemp, curr.z);
-                            sampler.expandRaw(mutableBlockPos, (short) blockState.getMapColor(null, null).id, res);
+                            sampler.expandRaw(mutableBlockPos, colorId, res);
                         }
                     }
                 }

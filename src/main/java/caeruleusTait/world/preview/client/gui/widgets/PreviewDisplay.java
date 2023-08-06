@@ -356,8 +356,13 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                     } else if (rawData > Short.MIN_VALUE && renderSettings.showHeightMap) {
                         color = heightColorMap[rawData - dataProvider.yMin()];
                     } else if (renderSettings.showIntersections && rawData >= 0) {
+                        // Main y-intersection
                         color = MapColor.byId(rawData).col;
                         color = textureColor(color == 0 ? 0xFFFFFF : color);
+                    } else if (renderSettings.showIntersections && rawData > Short.MIN_VALUE) {
+                        // See through one layer of air
+                        color = MapColor.byId(-rawData).col;
+                        color = highlightColor(textureColor(color == 0 ? 0xFFFFFF : color));
                     }
 
                     // Draw
@@ -666,7 +671,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         int G = (orig >> 8) & 0xFF;
         int B = (orig >> 0) & 0xFF;
 
-        final int diff = ((R + G + B) / 3) > 200 ? -64 : 64;
+        final int diff = ((R + G + B) / 3) > 200 ? -100 : 100;
 
         R += diff;
         G += diff;

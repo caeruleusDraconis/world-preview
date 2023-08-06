@@ -59,10 +59,22 @@ public class SlowIntersectionWorkUnit extends WorkUnit {
                 break;
             }
             final NoiseColumn nc = sampleUtils.doIntersectionsSlow(p);
+            short lastColorId = 0;
             for (int y = yMin; y <= yMax; y += yStride) {
                 final WorkResult res = results.get((y - yMin) / yStride);
                 final BlockState bs = nc.getBlock(y);
-                sampler.expandRaw(p, (short) bs.getMapColor(null, null).id, res);
+
+                // See through one layer of air logic
+                short currId = (short) bs.getMapColor(null, null).id;
+                if (currId == 0 && lastColorId > 0) {
+                    currId = (short) -lastColorId;
+                    lastColorId = 0;
+                } else {
+                    lastColorId = currId;
+                }
+
+                // Set value
+                sampler.expandRaw(p, currId, res);
             }
         }
         return results;
