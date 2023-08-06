@@ -45,7 +45,7 @@ import java.util.function.BiFunction;
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
 
 public class WorkManager {
-    public static final int Y_BLOCK_SHIFT = 4;
+    public static final int Y_BLOCK_SHIFT = 3;
     public static final int Y_BLOCK_STRIDE = 1 << Y_BLOCK_SHIFT;
 
     private final Object completedSynchro = new Object();

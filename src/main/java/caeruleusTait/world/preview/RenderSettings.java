@@ -38,12 +38,12 @@ public class RenderSettings {
     }
 
     public void incrementY() {
-        int nextY = (Math.min(center.getY() + 16, WorldPreview.get().workManager().yMax()) / Y_BLOCK_STRIDE) * Y_BLOCK_STRIDE;
+        int nextY = (Math.min(center.getY() + Y_BLOCK_STRIDE, WorldPreview.get().workManager().yMax()) / Y_BLOCK_STRIDE) * Y_BLOCK_STRIDE;
         center = new BlockPos(center.getX(), nextY, center.getZ());
     }
 
     public void decrementY() {
-        int nextY = (Math.max(center.getY() - 16, WorldPreview.get().workManager().yMin()) / Y_BLOCK_STRIDE) * Y_BLOCK_STRIDE;
+        int nextY = (Math.max(center.getY() - Y_BLOCK_STRIDE, WorldPreview.get().workManager().yMin()) / Y_BLOCK_STRIDE) * Y_BLOCK_STRIDE;
         center = new BlockPos(center.getX(), nextY, center.getZ());
     }
 
