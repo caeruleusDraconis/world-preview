@@ -1,7 +1,0 @@
-{
-  "minecraft:stronghold": {
-    "icon": "world_preview:textures/structure/stronghold2.png",
-    "name": "Stronghold",
-    "showByDefault": true
-  }
-}

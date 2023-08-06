@@ -1,8 +1,8 @@
 package caeruleusTait.world.preview;
 
 import caeruleusTait.world.preview.backend.sampler.ChunkSampler;
-import caeruleusTait.world.preview.backend.sampler.QuarterQuartSampler;
 import caeruleusTait.world.preview.backend.sampler.FullQuartSampler;
+import caeruleusTait.world.preview.backend.sampler.QuarterQuartSampler;
 import caeruleusTait.world.preview.backend.sampler.SingleQuartSampler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;

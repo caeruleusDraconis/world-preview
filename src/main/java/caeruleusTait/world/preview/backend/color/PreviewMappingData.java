@@ -11,10 +11,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PreviewMappingData {
-    private final Map<String, InternalColorEntry> resourceOnlyColorMappingData = new HashMap<>();
-    private final Map<String, InternalColorEntry> colorMappingData = new HashMap<>();
+    private final Map<String, ColorEntry> resourceOnlyColorMappingData = new HashMap<>();
+    private final Map<String, ColorEntry> colorMappingData = new HashMap<>();
 
-    private final Map<String, InternalStructureEntry> structMappingData = new HashMap<>();
+    private final Map<String, StructureEntry> structMappingData = new HashMap<>();
 
     private final List<PreviewData.HeightmapPresetData> heightmapPresets = new ArrayList<>();
     private final List<ColorMap> colorMaps = new ArrayList<>();
@@ -50,19 +50,19 @@ public class PreviewMappingData {
         resourceOnlyColorMappingData.putAll(colorMappingData);
     }
 
-    public void update(Map<ResourceLocation, ColorEntry> newData, PreviewData.DataSource dataSource) {
+    public void update(Map<ResourceLocation, ColorEntry> newData) {
         colorMappingData.putAll(
                 newData.entrySet()
                         .stream()
-                        .collect(Collectors.toMap(x -> x.getKey().toString(), x -> new InternalColorEntry(x.getValue(), dataSource)))
+                        .collect(Collectors.toMap(x -> x.getKey().toString(), Map.Entry::getValue))
         );
     }
 
-    public void updateStruct(Map<ResourceLocation, StructureEntry> newData, PreviewData.DataSource dataSource) {
+    public void updateStruct(Map<ResourceLocation, StructureEntry> newData) {
         structMappingData.putAll(
                 newData.entrySet()
                         .stream()
-                        .collect(Collectors.toMap(x -> x.getKey().toString(), x -> new InternalStructureEntry(x.getValue(), dataSource)))
+                        .collect(Collectors.toMap(x -> x.getKey().toString(), Map.Entry::getValue))
         );
     }
 
@@ -74,7 +74,12 @@ public class PreviewMappingData {
         colorMaps.add(colorMap);
     }
 
-    public PreviewData generateMapData(Set<ResourceLocation> biomesSet, Set<ResourceLocation> structuresSet) {
+    public PreviewData generateMapData(
+            Set<ResourceLocation> biomesSet,
+            Set<ResourceLocation> caveBiomesSet,
+            Set<ResourceLocation> structuresSet,
+            Set<ResourceLocation> displayByDefaultStructuresSet
+    ) {
         List<String> biomes = biomesSet.stream().map(ResourceLocation::toString).sorted().toList();
         List<String> structures = structuresSet.stream().map(ResourceLocation::toString).sorted().toList();
 
@@ -91,9 +96,10 @@ public class PreviewMappingData {
             final String biome = biomes.get(id);
             res.biome2Id().put(biome, id);
 
-            InternalColorEntry color = colorMappingData.get(biome);
+            ColorEntry color = colorMappingData.get(biome);
             if (color == null) {
-                color = new InternalColorEntry(new ColorEntry(), PreviewData.DataSource.MISSING);
+                color = new ColorEntry();
+                color.dataSource = PreviewData.DataSource.MISSING;
                 byte[] hash = sha1.digest(biome.getBytes(StandardCharsets.UTF_8));
                 ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES);
                 for (int i = 0; i < Integer.BYTES && i < hash.length; ++i) {
@@ -103,18 +109,19 @@ public class PreviewMappingData {
                 color.name = null;
             }
 
-            InternalColorEntry resourceOnlyColor = resourceOnlyColorMappingData.get(biome);
+            ColorEntry resourceOnlyColor = resourceOnlyColorMappingData.get(biome);
             if (resourceOnlyColor == null) {
                 resourceOnlyColor = color;
             }
 
+            ResourceLocation biomeRes = new ResourceLocation(biome);
             res.biomeId2BiomeData()[id] = new PreviewData.BiomeData(
                     id,
-                    new ResourceLocation(biome),
+                    biomeRes,
                     color.color,
                     resourceOnlyColor.color,
-                    color.cave,
-                    resourceOnlyColor.cave,
+                    color.cave.orElse(caveBiomesSet.contains(biomeRes)),
+                    resourceOnlyColor.cave.orElse(caveBiomesSet.contains(biomeRes)),
                     color.name,
                     resourceOnlyColor.name,
                     color.dataSource
@@ -125,20 +132,23 @@ public class PreviewMappingData {
             final String structTag = structures.get(id);
             res.struct2Id().put(structTag, id);
 
-            InternalStructureEntry structure = structMappingData.get(structTag);
+            StructureEntry structure = structMappingData.get(structTag);
             if (structure == null) {
-                structure = new InternalStructureEntry(new StructureEntry(), PreviewData.DataSource.MISSING);
-                structure.icon = "world_preview:textures/structure/unknown.png";
+                structure = new StructureEntry();
+                structure.dataSource = PreviewData.DataSource.MISSING;
+                structure.texture = "world_preview:textures/structure/unknown.png";
                 structure.name = structTag;
-                structure.showByDefault = false;
+                structure.showByDefault = Optional.empty();
             }
 
+            ResourceLocation structureRes = new ResourceLocation(structTag);
             res.structId2StructData()[id] = new PreviewData.StructureData(
                     id,
-                    new ResourceLocation(structTag),
+                    structureRes,
                     structure.name,
-                    new ResourceLocation(structure.icon),
-                    structure.showByDefault,
+                    structure.texture == null ? null : new ResourceLocation(structure.texture),
+                    structure.item == null ? null : new ResourceLocation(structure.item),
+                    structure.showByDefault.orElse(displayByDefaultStructuresSet.contains(structureRes)),
                     structure.dataSource
             );
         }
@@ -147,44 +157,27 @@ public class PreviewMappingData {
     }
 
     public static class ColorEntry {
+        public PreviewData.DataSource dataSource;
         public int color;
-        public boolean cave = false;
+        public Optional<Boolean> cave = Optional.empty();
         public String name = null;
 
         public ColorEntry() {
         }
 
-        public ColorEntry(int color, boolean cave) {
+        public ColorEntry(PreviewData.DataSource dataSource, int color, boolean cave, String name) {
+            this.dataSource = dataSource;
             this.color = color;
-            this.cave = cave;
+            this.cave = Optional.of(cave);
+            this.name = name;
         }
     }
 
     public static class StructureEntry {
-        public String name;
-        public String icon;
-        public boolean showByDefault;
-    }
-
-    private static class InternalColorEntry extends ColorEntry {
         public PreviewData.DataSource dataSource;
-
-        private InternalColorEntry(ColorEntry base, PreviewData.DataSource dataSource) {
-            this.color = base.color;
-            this.cave = base.cave;
-            this.name = base.name;
-            this.dataSource = dataSource;
-        }
-    }
-
-    private static class InternalStructureEntry extends StructureEntry {
-        public PreviewData.DataSource dataSource;
-
-        private InternalStructureEntry(StructureEntry base, PreviewData.DataSource dataSource) {
-            this.name = base.name;
-            this.icon = base.icon;
-            this.showByDefault = base.showByDefault;
-            this.dataSource = dataSource;
-        }
+        public String name = null;
+        public String texture = null;
+        public String item = null;
+        public Optional<Boolean> showByDefault = Optional.empty();
     }
 }

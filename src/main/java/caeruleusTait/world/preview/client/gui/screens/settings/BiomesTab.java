@@ -1,13 +1,13 @@
 package caeruleusTait.world.preview.client.gui.screens.settings;
 
 import caeruleusTait.world.preview.WorldPreview;
+import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.client.gui.screens.PreviewTab;
 import caeruleusTait.world.preview.client.gui.widgets.ColorChooser;
 import caeruleusTait.world.preview.client.gui.widgets.WGCheckbox;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
 import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
-import caeruleusTait.world.preview.backend.color.PreviewData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;

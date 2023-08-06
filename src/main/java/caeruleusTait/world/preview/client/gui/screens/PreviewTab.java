@@ -1,10 +1,12 @@
 package caeruleusTait.world.preview.client.gui.screens;
 
 import caeruleusTait.world.preview.RenderSettings;
-import caeruleusTait.world.preview.backend.WorkManager;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.WorldPreviewConfig;
+import caeruleusTait.world.preview.backend.WorkManager;
 import caeruleusTait.world.preview.backend.color.ColorMap;
+import caeruleusTait.world.preview.backend.color.PreviewData;
+import caeruleusTait.world.preview.backend.color.PreviewMappingData;
 import caeruleusTait.world.preview.client.gui.PreviewDisplayDataProvider;
 import caeruleusTait.world.preview.client.gui.widgets.PreviewDisplay;
 import caeruleusTait.world.preview.client.gui.widgets.ToggleButton;
@@ -12,8 +14,6 @@ import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionLis
 import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.SeedsList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.StructuresList;
-import caeruleusTait.world.preview.backend.color.PreviewData;
-import caeruleusTait.world.preview.backend.color.PreviewMappingData;
 import caeruleusTait.world.preview.mixin.client.CreateWorldScreenAccessor;
 import caeruleusTait.world.preview.mixin.client.ScreenAccessor;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -37,6 +37,8 @@ import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -57,11 +59,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
 
 public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvider {
+
+    public static final TagKey<Biome> CAVE_BIOMES = TagKey.create(Registries.BIOME, new ResourceLocation("c", "is_cave"));
+    public static final TagKey<Structure> DISPLAY_BY_DEFAULT = TagKey.create(Registries.STRUCTURE, new ResourceLocation("c", "display_on_map_by_default"));
 
     public static final ResourceLocation BUTTONS_TEXTURE = new ResourceLocation("world_preview:textures/gui/buttons.png");
     public static final int BUTTONS_TEX_WIDTH = 320;
@@ -289,19 +295,34 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
     public void patchColorData() {
         Map<ResourceLocation, PreviewMappingData.ColorEntry> configured = Arrays.stream(allBiomes)
                 .filter(x -> x.dataSource() == PreviewData.DataSource.CONFIG)
-                .collect(Collectors.toMap(x -> x.entry().key().location(), x -> new PreviewMappingData.ColorEntry(x.color(), x.isCave())));
+                .collect(
+                        Collectors.toMap(
+                                x -> x.entry().key().location(),
+                                x -> new PreviewMappingData.ColorEntry(PreviewData.DataSource.MISSING, x.color(), x.isCave(), x.name())
+                        )
+                );
 
         Map<ResourceLocation, PreviewMappingData.ColorEntry> defaults = Arrays.stream(allBiomes)
                 .filter(x -> x.dataSource() == PreviewData.DataSource.RESOURCE)
-                .collect(Collectors.toMap(x -> x.entry().key().location(), x -> new PreviewMappingData.ColorEntry(x.color(), x.isCave())));
+                .collect(
+                        Collectors.toMap(
+                                x -> x.entry().key().location(),
+                                x -> new PreviewMappingData.ColorEntry(PreviewData.DataSource.RESOURCE, x.color(), x.isCave(), x.name())
+                        )
+                );
 
         Map<ResourceLocation, PreviewMappingData.ColorEntry> missing = Arrays.stream(allBiomes)
                 .filter(x -> x.dataSource() == PreviewData.DataSource.MISSING)
-                .collect(Collectors.toMap(x -> x.entry().key().location(), x -> new PreviewMappingData.ColorEntry(x.color(), x.isCave())));
+                .collect(
+                        Collectors.toMap(
+                                x -> x.entry().key().location(),
+                                x -> new PreviewMappingData.ColorEntry(PreviewData.DataSource.CONFIG, x.color(), x.isCave(), x.name())
+                        )
+                );
 
-        previewMappingData.update(missing, PreviewData.DataSource.MISSING);
-        previewMappingData.update(defaults, PreviewData.DataSource.RESOURCE);
-        previewMappingData.update(configured, PreviewData.DataSource.CONFIG);
+        previewMappingData.update(missing);
+        previewMappingData.update(defaults);
+        previewMappingData.update(configured);
         updateSettings(uiState);
     }
 
@@ -364,14 +385,24 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
                     if (reloadRevision.get() > revision) {
                         return null;
                     }
-                    return previewWorldCreationContext();
+                    try {
+                        return previewWorldCreationContext();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                        throw e;
+                    }
                 }, reloadExecutor)
                 .thenAcceptAsync(x -> {
                     // Check if we are the latest update
                     if (reloadRevision.get() > revision || x == null) {
                         return;
                     }
-                    updateSettings_real(x);
+                    try {
+                        updateSettings_real(x);
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                        throw e;
+                    }
                     synchronized (reloadRevision) {
                         if (reloadRevision.get() <= revision) {
                             isUpdating = false;
@@ -420,7 +451,16 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         }
         LevelStem levelStem = levelStemRegistry.get(renderSettings.dimension);
 
-        previewData = previewMappingData.generateMapData(biomeRegistry.keySet(), strucutreRegistry.keySet());
+        previewData = previewMappingData.generateMapData(
+                biomeRegistry.keySet(),
+                StreamSupport.stream(biomeRegistry.getTagOrEmpty(CAVE_BIOMES).spliterator(), false)
+                        .map(x -> x.unwrapKey().orElseThrow().location())
+                        .collect(Collectors.toSet()),
+                strucutreRegistry.keySet(),
+                StreamSupport.stream(strucutreRegistry.getTagOrEmpty(DISPLAY_BY_DEFAULT).spliterator(), false)
+                        .map(x -> x.unwrapKey().orElseThrow().location())
+                        .collect(Collectors.toSet())
+        );
 
         // Check whether we have a valid colormap stored
         ColorMap colorMap = previewData.colorMaps().get(cfg.colorMap);
@@ -486,6 +526,9 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         for (int i = 0; i < previewData.structId2StructData().length; ++i) {
             PreviewData.StructureData data = previewData.structId2StructData()[i];
             allStructureIcons[i] = icons.computeIfAbsent(data.icon(), x -> {
+                if (x == null) {
+                    x = new ResourceLocation("world_preview:textures/structure/unknown.png");
+                }
                 Optional<Resource> resource = builtinResourceManager.getResource(x);
                 if (resource.isEmpty()) {
                     resource = workManager.sampleResourceManager().getResource(x);
@@ -510,6 +553,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         }
 
         //  - List entries
+        Registry<Item> itemRegistry = layeredRegistryAccess.compositeAccess().registryOrThrow(Registries.ITEM);
         allStructures = strucutreRegistry.holders()
                 .map(x -> {
                     final short id = previewData.struct2Id().getShort(x.key().location().toString());
@@ -518,6 +562,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
                             id,
                             x.key().location(),
                             allStructureIcons[id],
+                            structureData.item() == null ? null : itemRegistry.get(structureData.item()),
                             structureData.name(),
                             structureData.showByDefault(),
                             structureData.showByDefault()
@@ -792,6 +837,11 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
     @Override
     public BiomesList.BiomeEntry biome4Id(int id) {
         return allBiomes[id];
+    }
+
+    @Override
+    public StructuresList.StructureEntry structure4Id(int id) {
+        return allStructures[id];
     }
 
     @Override

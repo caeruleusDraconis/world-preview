@@ -146,9 +146,16 @@ public class WorldPreview {
     }
 
     public void writeUserColorConfig(Map<ResourceLocation, PreviewMappingData.ColorEntry> userColorConfig) {
-        Map<String, PreviewMappingData.ColorEntry> writeData = userColorConfig.entrySet()
+        record Entry(int r, int g, int b, boolean cave) {}
+        Map<String, Entry> writeData = userColorConfig.entrySet()
                 .stream()
-                .collect(Collectors.toMap(x -> x.getKey().toString(), Map.Entry::getValue));
+                .collect(Collectors.toMap(x -> x.getKey().toString(), x -> {
+                    PreviewMappingData.ColorEntry raw = x.getValue();
+                    final int r = (raw.color >> 16) & 0xFF;
+                    final int g = (raw.color >> 8) & 0xFF;
+                    final int b = raw.color & 0xFF;
+                    return new Entry(r, g, b, raw.cave.orElseThrow());
+                }));
 
         final String raw = gson.toJson(writeData);
         try {

@@ -1,7 +1,0 @@
-{
-  "minecraft:desert_pyramid": {
-    "icon": "world_preview:textures/structure/desert_temple.png",
-    "name": "Desert Temple",
-    "showByDefault": true
-  }
-}

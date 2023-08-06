@@ -4,9 +4,7 @@ import caeruleusTait.world.preview.backend.worker.WorkResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.biome.Biome;
 
 import java.util.List;
 

@@ -1,9 +1,9 @@
 package caeruleusTait.world.preview.client.gui.screens;
 
 import caeruleusTait.world.preview.WorldPreview;
-import caeruleusTait.world.preview.client.gui.screens.settings.*;
-import caeruleusTait.world.preview.backend.color.PreviewMappingData;
 import caeruleusTait.world.preview.backend.color.PreviewData;
+import caeruleusTait.world.preview.backend.color.PreviewMappingData;
+import caeruleusTait.world.preview.client.gui.screens.settings.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.tabs.TabManager;
@@ -102,7 +102,12 @@ public class SettingsScreen extends Screen {
         Map<ResourceLocation, PreviewMappingData.ColorEntry> toWrite = previewTab.allBiomes()
                 .stream()
                 .filter(x -> x.dataSource() == PreviewData.DataSource.CONFIG)
-                .collect(Collectors.toMap(x -> x.entry().key().location(), x -> new PreviewMappingData.ColorEntry(x.color(), x.isCave())));
+                .collect(
+                        Collectors.toMap(
+                                x -> x.entry().key().location(),
+                                x -> new PreviewMappingData.ColorEntry(PreviewData.DataSource.CONFIG, x.color(), x.isCave(), x.name())
+                        )
+                );
         WorldPreview.get().writeUserColorConfig(toWrite);
 
         // Apply transient changes to the color data

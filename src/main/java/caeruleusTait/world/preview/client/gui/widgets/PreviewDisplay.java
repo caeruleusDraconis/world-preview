@@ -1,15 +1,15 @@
 package caeruleusTait.world.preview.client.gui.widgets;
 
 import caeruleusTait.world.preview.RenderSettings;
-import caeruleusTait.world.preview.backend.WorkManager;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.WorldPreviewConfig;
-import caeruleusTait.world.preview.client.WorldPreviewClient;
-import caeruleusTait.world.preview.client.gui.PreviewDisplayDataProvider;
-import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
+import caeruleusTait.world.preview.backend.WorkManager;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.storage.PreviewSection;
 import caeruleusTait.world.preview.backend.storage.PreviewStorage;
+import caeruleusTait.world.preview.client.WorldPreviewClient;
+import caeruleusTait.world.preview.client.gui.PreviewDisplayDataProvider;
+import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
 import it.unimi.dsi.fastutil.shorts.Short2LongOpenHashMap;
@@ -182,7 +182,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         final int xMax = xMin + width;
         final int yMax = yMin + height;
 
-        // Render the texture
+        // Render the icon
         WorldPreviewClient.renderTexture(previewTexture, xMin, yMin, xMax, yMax);
 
         // Create a border
@@ -318,7 +318,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
 
         // Render the biomes / heightmap
         for (RenderHelper r : renderData) {
-            // Reset texture coords to the current section
+            // Reset icon coords to the current section
             texX = r.sectionStartTexX;
 
             // Draw all the relevant data in the section
@@ -393,7 +393,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                     continue;
                 }
 
-                // Copy texture
+                // Copy icon
                 final int texStartX = texCenter.x - (icon.getWidth() / 2);
                 final int texStartZ = texCenter.z - (icon.getHeight() / 2);
                 final int iconStartX = Math.max(0, -texStartX);
@@ -522,13 +522,13 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
             if (config.showControls) {
                 setTooltip(Tooltip.create(Component.translatable(
                         "world_preview.preview-display.struct.tooltip.controls",
-                        nameFormatter(dataProvider.previewData().structId2StructData()[structure.structureId()].name()),
+                        nameFormatter(dataProvider.structure4Id(structure.structureId()).name()),
                         blockPosTemplate.formatted(structure.center().getX(), structure.center().getY(), structure.center().getZ())
                 )));
             } else {
                 setTooltip(Tooltip.create(Component.translatable(
                         "world_preview.preview-display.struct.tooltip",
-                        nameFormatter(dataProvider.previewData().structId2StructData()[structure.structureId()].name()),
+                        nameFormatter(dataProvider.structure4Id(structure.structureId()).name()),
                         blockPosTemplate.formatted(structure.center().getX(), structure.center().getY(), structure.center().getZ())
                 )));
             }

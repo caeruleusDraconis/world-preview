@@ -452,4 +452,8 @@ public class WorkManager {
     public ResourceManager sampleResourceManager() {
         return sampleUtils.resourceManager();
     }
+
+    public SampleUtils sampleUtils() {
+        return sampleUtils;
+    }
 }

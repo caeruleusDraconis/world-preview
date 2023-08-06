@@ -12,7 +12,10 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -25,8 +28,8 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
         super(minecraft, width, height, x, y, 24);
     }
 
-    public StructureEntry createEntry(short id, ResourceLocation resourceLocation, NativeImage icon, String name, boolean show, boolean showByDefault) {
-        return new StructureEntry(id, resourceLocation, icon, name, show, showByDefault);
+    public StructureEntry createEntry(short id, ResourceLocation resourceLocation, NativeImage icon, Item item, String name, boolean show, boolean showByDefault) {
+        return new StructureEntry(id, resourceLocation, icon, item, name, show, showByDefault);
     }
 
     @Override
@@ -44,6 +47,8 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
     public class StructureEntry extends BaseObjectSelectionList.Entry<StructuresList.StructureEntry> implements StructureRenderInfo {
         private final short id;
         private final NativeImage icon;
+        private final Item item;
+        private final ItemStack itemStack;
         private final DynamicTexture iconTexture;
         private final int iconWidth;
         private final int iconHeight;
@@ -55,8 +60,10 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
         private boolean show;
         public final ToggleButton toggleVisible;
 
-        public StructureEntry(short id, ResourceLocation resourceLocation, NativeImage icon, String name, boolean show, boolean showByDefault) {
+        public StructureEntry(short id, ResourceLocation resourceLocation, @NotNull NativeImage icon, @Nullable Item item, String name, boolean show, boolean showByDefault) {
             this.id = id;
+            this.item = item;
+            this.itemStack = this.item == null ? null : new ItemStack(this.item, 1);
             this.icon = icon;
             this.iconTexture = new DynamicTexture(this.icon);
             this.iconWidth = this.icon.getWidth();
@@ -74,7 +81,7 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
             this.toggleVisible.selected = show;
 
             this.isPrimaryNamespace = resourceLocation.getNamespace().equals("minecraft");
-            if (Objects.equals(resourceLocation.toString(), name)) {
+            if (Objects.equals(resourceLocation.toString(), name) || name == null) {
                 this.name = WorldPreviewClient.toTitleCase(resourceLocation.getPath().replace("_", " "));
             } else {
                 this.name = name;
@@ -125,7 +132,11 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
             final int xMax = xMin + iconWidth;
             final int yMax = yMin + iconHeight;
 
-            WorldPreviewClient.renderTexture(iconTexture, xMin, yMin, xMax, yMax);
+            if (item != null) {
+                guiGraphics.renderItem(itemStack, xMin, yMin);
+            } else {
+                WorldPreviewClient.renderTexture(iconTexture, xMin, yMin, xMax, yMax);
+            }
             String formatName = isPrimaryNamespace ? name : "§o" + name;
             guiGraphics.drawString(minecraft.font, formatName, left + 16 + 4, top + 6, 0xFFFFFF);
             toggleVisible.setPosition(getRowRight() - 22, top);

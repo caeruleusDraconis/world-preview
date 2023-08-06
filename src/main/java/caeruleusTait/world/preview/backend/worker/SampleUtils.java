@@ -4,7 +4,6 @@ import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.storage.PreviewLevel;
 import caeruleusTait.world.preview.backend.stubs.DummyMinecraftServer;
 import caeruleusTait.world.preview.backend.stubs.EmptyAquifer;
-import caeruleusTait.world.preview.mixin.NoiseBasedChunkGeneratorAccessor;
 import caeruleusTait.world.preview.mixin.NoiseChunkAccessor;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Pair;
@@ -291,5 +290,9 @@ public class SampleUtils implements AutoCloseable {
 
     public CloseableResourceManager resourceManager() {
         return resourceManager;
+    }
+
+    public RegistryAccess registryAccess() {
+        return registryAccess;
     }
 }

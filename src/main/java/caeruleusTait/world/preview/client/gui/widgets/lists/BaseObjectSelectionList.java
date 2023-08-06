@@ -4,12 +4,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 
 import java.util.Collection;
-
-import static caeruleusTait.world.preview.WorldPreview.LOGGER;
 
 public abstract class BaseObjectSelectionList<E extends BaseObjectSelectionList.Entry<E>> extends ObjectSelectionList<E> {
     public BaseObjectSelectionList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight) {

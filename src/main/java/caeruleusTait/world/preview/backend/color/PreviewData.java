@@ -24,7 +24,7 @@ public record PreviewData(
     public record BiomeData(int id, ResourceLocation tag, int color, int resourceOnlyColor, boolean isCave, boolean resourceOnlyIsCave, String name, String resourceOnlyName, DataSource dataSource) {
     }
 
-    public record StructureData(int id, ResourceLocation tag, String name, ResourceLocation icon, boolean showByDefault, DataSource dataSource) {
+    public record StructureData(int id, ResourceLocation tag, String name, ResourceLocation icon, ResourceLocation item, boolean showByDefault, DataSource dataSource) {
     }
 
     public record HeightmapPresetData(String name, int minY, int maxY) {

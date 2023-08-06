@@ -1,7 +1,0 @@
-{
-  "minecraft:trail_ruins": {
-    "icon": "world_preview:textures/structure/trail_ruins.png",
-    "name": "Trail Ruins",
-    "showByDefault": true
-  }
-}

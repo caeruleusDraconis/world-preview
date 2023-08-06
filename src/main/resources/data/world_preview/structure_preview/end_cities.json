@@ -1,7 +1,0 @@
-{
-  "minecraft:end_city": {
-    "icon": "world_preview:textures/structure/end_city.png",
-    "name": "End City",
-    "showByDefault": true
-  }
-}

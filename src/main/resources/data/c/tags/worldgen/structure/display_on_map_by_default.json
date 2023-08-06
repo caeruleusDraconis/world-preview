@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:swamp_hut",
+    "minecraft:ancient_city",
+    "minecraft:jungle_pyramid",
+    "minecraft:monument",
+    "minecraft:mansion",
+    "minecraft:pillager_outpost",
+    "minecraft:trail_ruins",
+    "minecraft:end_city",
+    "minecraft:desert_pyramid",
+    "minecraft:stronghold",
+    "minecraft:igloo",
+    "minecraft:fortress",
+    "minecraft:bastion_remnant",
+    "minecraft:village_plains",
+    "minecraft:village_desert",
+    "minecraft:village_savanna",
+    "minecraft:village_snowy",
+    "minecraft:village_taiga"
+  ]
+}

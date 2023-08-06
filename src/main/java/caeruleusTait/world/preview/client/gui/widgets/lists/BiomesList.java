@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import static caeruleusTait.world.preview.WorldPreview.LOGGER;
 import static caeruleusTait.world.preview.WorldPreview.nativeColor;
 
 public class BiomesList extends BaseObjectSelectionList<BiomesList.BiomeEntry> {

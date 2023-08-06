@@ -1,7 +1,0 @@
-{
-  "minecraft:pillager_outpost": {
-    "icon": "world_preview:textures/structure/pillager_outpost.png",
-    "name": "Pillager Outpost",
-    "showByDefault": true
-  }
-}
