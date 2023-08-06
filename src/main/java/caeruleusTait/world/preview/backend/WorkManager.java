@@ -398,8 +398,7 @@ public class WorkManager {
 
         final List<Integer> res = new ArrayList<>();
 
-        // final int max = dimensionType.height() / Y_BLOCK_STRIDE + 1; // Full height
-        final int max = 4; // Probably good enough
+        final int max = dimensionType.height() / Y_BLOCK_STRIDE + 1; // Full height
         for (int i = 1; i <= max; ++i) {
             int y1 = y + i * Y_BLOCK_STRIDE;
             int y2 = y - i * Y_BLOCK_STRIDE;
