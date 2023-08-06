@@ -4,6 +4,7 @@ import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.storage.PreviewLevel;
 import caeruleusTait.world.preview.backend.stubs.DummyMinecraftServer;
 import caeruleusTait.world.preview.backend.stubs.EmptyAquifer;
+import caeruleusTait.world.preview.mixin.NoiseBasedChunkGeneratorAccessor;
 import caeruleusTait.world.preview.mixin.NoiseChunkAccessor;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Pair;
@@ -218,7 +219,7 @@ public class SampleUtils implements AutoCloseable {
         return res;
     }
 
-    public NoiseChunk getNoiseChunk(ChunkPos startChunk, int numChunks) {
+    public NoiseChunk getNoiseChunk(ChunkPos startChunk, int numChunks, boolean keepAquifer) {
         NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
         NoiseChunk noiseChunk = new NoiseChunk(
                 (numChunks * 16) / noiseSettings.getCellWidth(),
@@ -228,10 +229,12 @@ public class SampleUtils implements AutoCloseable {
                 noiseSettings,
                 DensityFunctions.BeardifierMarker.INSTANCE,
                 noiseGeneratorSettings,
-                null, // ((NoiseBasedChunkGeneratorAccessor) chunkGenerator).getGlobalFluidPicker().get(),
+                ((NoiseBasedChunkGeneratorAccessor) chunkGenerator).getGlobalFluidPicker().get(),
                 Blender.empty()
         );
-        ((NoiseChunkAccessor) noiseChunk).setAquifer(new EmptyAquifer());
+        if (!keepAquifer) {
+            ((NoiseChunkAccessor) noiseChunk).setAquifer(new EmptyAquifer());
+        }
         return noiseChunk;
     }
 

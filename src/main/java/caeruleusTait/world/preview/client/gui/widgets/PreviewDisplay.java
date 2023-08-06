@@ -29,6 +29,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
@@ -354,12 +355,10 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                         workingVisibleBiomes[rawData] += 1;
                     } else if (rawData > Short.MIN_VALUE && renderSettings.showHeightMap) {
                         color = heightColorMap[rawData - dataProvider.yMin()];
-                    } else if (renderSettings.showIntersections) {
-                        color = switch (rawData) {
-                            case 0 -> 0xFF000000;
-                            case 1 -> 0xFFFFFFFF;
-                            default -> 0xFF888888;
-                        };
+                    } else if (renderSettings.showIntersections && rawData >= 0) {
+                        color = MapColor.byId(rawData).col;
+                        // RGBA --> ARGB
+                        color = textureColor(color == 0 ? 0xFFFFFF : color);
                     }
 
                     // Draw

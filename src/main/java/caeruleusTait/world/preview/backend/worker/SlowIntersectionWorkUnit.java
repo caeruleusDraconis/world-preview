@@ -39,7 +39,6 @@ public class SlowIntersectionWorkUnit extends WorkUnit {
     @Override
     protected List<WorkResult> doWork() {
         final List<WorkResult> results = new ArrayList<>((yMax - yMin) / yStride);
-        final Predicate<BlockState> predicate = Heightmap.Types.OCEAN_FLOOR_WG.isOpaque();
 
         // Initialize the results for each y-level
         for (int y = yMin; y <= yMax; y += yStride) {
@@ -63,7 +62,7 @@ public class SlowIntersectionWorkUnit extends WorkUnit {
             for (int y = yMin; y <= yMax; y += yStride) {
                 final WorkResult res = results.get((y - yMin) / yStride);
                 final BlockState bs = nc.getBlock(y);
-                sampler.expandRaw(p, (short) (predicate.test(bs) ? 0 : 1), res);
+                sampler.expandRaw(p, (short) bs.getMapColor(null, null).id, res);
             }
         }
         return results;

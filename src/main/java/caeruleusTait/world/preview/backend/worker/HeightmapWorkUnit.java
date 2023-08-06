@@ -44,7 +44,7 @@ public class HeightmapWorkUnit extends WorkUnit {
         }
 
         final NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
-        final NoiseChunk noiseChunk = sampleUtils.getNoiseChunk(chunkPos, numChunks);
+        final NoiseChunk noiseChunk = sampleUtils.getNoiseChunk(chunkPos, numChunks, false);
         final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
         final int cellWidth = noiseSettings.getCellWidth();

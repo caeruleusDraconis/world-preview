@@ -50,7 +50,7 @@ public class IntersectionWorkUnit extends WorkUnit {
         }
 
         final NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
-        final NoiseChunk noiseChunk = sampleUtils.getNoiseChunk(chunkPos, numChunks);
+        final NoiseChunk noiseChunk = sampleUtils.getNoiseChunk(chunkPos, numChunks, true);
         final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
         final int yMin = noiseSettings.minY();
@@ -67,7 +67,6 @@ public class IntersectionWorkUnit extends WorkUnit {
         final int cellStrideXZ = Math.max(1, sampler.blockStride() / cellWidth);
         final int todoArraySize = Math.max(1, cellWidth / sampler.blockStride()) * Math.max(1, cellWidth / sampler.blockStride());
 
-        final Predicate<BlockState> predicate = Heightmap.Types.OCEAN_FLOOR_WG.isOpaque();
         final List<WorkResult> results = new ArrayList<>((yMax - yMin) / yStride);
 
         // Initialize the results for each y-level
@@ -126,7 +125,7 @@ public class IntersectionWorkUnit extends WorkUnit {
                             }
 
                             mutableBlockPos.set(curr.x, yTemp, curr.z);
-                            sampler.expandRaw(mutableBlockPos, (short) (predicate.test(blockState) ? 0 : 1), res);
+                            sampler.expandRaw(mutableBlockPos, (short) blockState.getMapColor(null, null).id, res);
                         }
                     }
 
