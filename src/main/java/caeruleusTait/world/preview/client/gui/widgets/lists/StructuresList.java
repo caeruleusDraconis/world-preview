@@ -167,6 +167,14 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
         public short id() {
             return id;
         }
+
+        public Item item() {
+            return item;
+        }
+
+        public ItemStack itemStack() {
+            return itemStack;
+        }
     }
 
 }

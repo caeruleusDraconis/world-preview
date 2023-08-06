@@ -39,6 +39,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -847,6 +848,11 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
     @Override
     public NativeImage[] structureIcons() {
         return allStructureIcons;
+    }
+
+    @Override
+    public ItemStack[] structureItems() {
+        return Arrays.stream(allStructures).map(StructuresList.StructureEntry::itemStack).toArray(ItemStack[]::new);
     }
 
     @Override

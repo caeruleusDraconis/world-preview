@@ -5,6 +5,7 @@ import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.StructuresList;
 import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
+import net.minecraft.world.item.ItemStack;
 
 public interface PreviewDisplayDataProvider {
     PreviewData previewData();
@@ -14,6 +15,8 @@ public interface PreviewDisplayDataProvider {
     StructuresList.StructureEntry structure4Id(int id);
 
     NativeImage[] structureIcons();
+
+    ItemStack[] structureItems();
 
     void onBiomeVisuallySelected(BiomesList.BiomeEntry entry);
 
