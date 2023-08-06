@@ -16,7 +16,7 @@ public class WorldPreviewComponents {
     public static final Component BTN_TOGGLE_STRUCTURES = Component.translatable("world_preview.preview.btn-toggle-structures");
     public static final Component BTN_TOGGLE_STRUCTURES_DISABLED = Component.translatable("world_preview.preview.btn-toggle-structures.disabled");
     public static final Component BTN_RESET_STRUCTURES = Component.translatable("world_preview.preview.btn-reset-structures");
-    public static final Component BTN_RESET_STRUCTURES_DISABLED = Component.translatable("world_preview.preview.btn-reset-structures.disabled");
+    public static final Component BTN_RESET_STRUCTURES_TOOLTIP = Component.translatable("world_preview.preview.btn-reset-structures.tooltip");
     public static final Component BTN_TOGGLE_HEIGHTMAP = Component.translatable("world_preview.preview.btn-toggle-heightmap");
     public static final Component BTN_TOGGLE_HEIGHTMAP_DISABLED = Component.translatable("world_preview.preview.btn-toggle-heightmap.disabled");
     public static final Component BTN_TOGGLE_INTERSECT = Component.translatable("world_preview.preview.btn-toggle-intersect");

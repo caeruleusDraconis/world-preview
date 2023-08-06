@@ -186,13 +186,11 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         resetToZeroZero.setTooltip(Tooltip.create(BTN_HOME));
         toRender.add(resetToZeroZero);
 
-        resetDefaultStructureVisibility = new ImageButton(
-                0, 0, 20, 20, /* x, y, width, height */
-                180, 20, 20, /* xTexStart, yTexStart, yDiffTex */
-                BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
-                x -> Arrays.stream(allStructures).forEach(StructuresList.StructureEntry::reset)
-        );
-        resetDefaultStructureVisibility.active = false; // Deactivate first in case sampleStructures is off
+        resetDefaultStructureVisibility = Button
+                .builder(BTN_RESET_STRUCTURES, x -> Arrays.stream(allStructures).forEach(StructuresList.StructureEntry::reset))
+                .build();
+        resetDefaultStructureVisibility.setTooltip(Tooltip.create(BTN_RESET_STRUCTURES_TOOLTIP));
+        resetDefaultStructureVisibility.visible = false;
         toRender.add(resetDefaultStructureVisibility);
 
         switchBiomes = Button.builder(DisplayType.BIOMES.component(), x -> onTabButtonChange(x, DisplayType.BIOMES))
@@ -578,14 +576,10 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         renderSettings.resetCenter();
 
         if (cfg.sampleStructures) {
-            resetDefaultStructureVisibility.active = true;
             toggleShowStructures.active = true;
-            resetDefaultStructureVisibility.setTooltip(Tooltip.create(BTN_RESET_STRUCTURES));
             toggleShowStructures.setTooltip(Tooltip.create(BTN_TOGGLE_STRUCTURES));
         } else {
-            resetDefaultStructureVisibility.active = false;
             toggleShowStructures.active = false;
-            resetDefaultStructureVisibility.setTooltip(Tooltip.create(BTN_RESET_STRUCTURES_DISABLED));
             toggleShowStructures.setTooltip(Tooltip.create(BTN_TOGGLE_STRUCTURES_DISABLED));
         }
 
@@ -696,6 +690,8 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         switchStructures.active = true;
         switchSeeds.active = true;
 
+        resetDefaultStructureVisibility.visible = false;
+
         if (cfg.sampleStructures) {
             switchStructures.setTooltip(null);
         } else {
@@ -706,7 +702,10 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         btn.active = false;
         switch (type) {
             case BIOMES -> biomesListHolder.visible = true;
-            case STRUCTURES -> structuresListHolder.visible = true;
+            case STRUCTURES -> {
+                resetDefaultStructureVisibility.visible = true;
+                structuresListHolder.visible = true;
+            }
             case SEEDS -> seedsListHolder.visible = true;
         }
     }
@@ -744,7 +743,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
 
     @Override
     public void doLayout(ScreenRectangle screenRectangle) {
-        int leftWidth = Math.min(180, screenRectangle.width() / 3);
+        int leftWidth = Math.max(130, Math.min(180, screenRectangle.width() / 3));
         int left = screenRectangle.left() + 3;
         int top = screenRectangle.top() + 2;
         int bottom = screenRectangle.bottom() - 32;
@@ -766,14 +765,13 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         saveSeed.setY(bottom);
 
         // TOP
-        int cycleWith = leftWidth - 22 * 6;
+        int cycleWith = leftWidth - 22 * 5;
 
         int btnStart = left + cycleWith + 2;
         settings.setPosition(left, top);
         int i = 0;
         toggleIntersections.setPosition(btnStart + 22 * i++, top);
         toggleHeightmap.setPosition(btnStart + 22 * i++, top);
-        resetDefaultStructureVisibility.setPosition(btnStart + 22 * i++, top);
         toggleShowStructures.setPosition(btnStart + 22 * i++, top);
         toggleCaves.setPosition(btnStart + 22 * i++, top);
         resetToZeroZero.setPosition(btnStart + 22 * i++, top);
@@ -799,15 +797,22 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         biomesList.setRenderBackground(true);
         biomesList.setRenderTopAndBottom(false);
 
-        structuresListHolder.setPosition(left, top);
-        structuresListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
-        structuresList.setRenderBackground(true);
-        structuresList.setRenderTopAndBottom(false);
-
         seedsListHolder.setPosition(left, top);
         seedsListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
         seedsList.setRenderBackground(true);
         seedsList.setRenderTopAndBottom(false);
+
+        // BOTTOM
+        //  - new row
+        bottom -= LINE_HEIGHT + LINE_VSPACE;
+
+        resetDefaultStructureVisibility.setPosition(left, bottom);
+        resetDefaultStructureVisibility.setWidth(leftWidth);
+
+        structuresListHolder.setPosition(left, top);
+        structuresListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
+        structuresList.setRenderBackground(true);
+        structuresList.setRenderTopAndBottom(false);
     }
 
     public void close() {
