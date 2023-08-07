@@ -67,7 +67,10 @@ import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
 
 public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvider {
 
-    public static final TagKey<Biome> CAVE_BIOMES = TagKey.create(Registries.BIOME, new ResourceLocation("c", "is_cave"));
+    public static final TagKey<Biome> C_CAVE = TagKey.create(Registries.BIOME, new ResourceLocation("c", "caves"));
+    public static final TagKey<Biome> C_IS_CAVE = TagKey.create(Registries.BIOME, new ResourceLocation("c", "is_cave"));
+    public static final TagKey<Biome> FORGE_CAVE = TagKey.create(Registries.BIOME, new ResourceLocation("forge", "caves"));
+    public static final TagKey<Biome> FORGE_IS_CAVE = TagKey.create(Registries.BIOME, new ResourceLocation("forge", "is_cave"));
     public static final TagKey<Structure> DISPLAY_BY_DEFAULT = TagKey.create(Registries.STRUCTURE, new ResourceLocation("c", "display_on_map_by_default"));
 
     public static final ResourceLocation BUTTONS_TEXTURE = new ResourceLocation("world_preview:textures/gui/buttons.png");
@@ -450,11 +453,22 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
         }
         LevelStem levelStem = levelStemRegistry.get(renderSettings.dimension);
 
+        Set<ResourceLocation> caveBiomes = new HashSet<>();
+        for (TagKey<Biome> tagKey : List.of(C_CAVE, C_IS_CAVE, FORGE_CAVE, FORGE_IS_CAVE)) {
+            caveBiomes.addAll(
+                    StreamSupport.stream(biomeRegistry.getTagOrEmpty(tagKey).spliterator(), false)
+                            .map(x -> x.unwrapKey().orElseThrow().location())
+                            .toList()
+            );
+        }
+
+        for (ResourceLocation i : caveBiomes) {
+            LOGGER.warn(" - {}", i);
+        }
+
         previewData = previewMappingData.generateMapData(
                 biomeRegistry.keySet(),
-                StreamSupport.stream(biomeRegistry.getTagOrEmpty(CAVE_BIOMES).spliterator(), false)
-                        .map(x -> x.unwrapKey().orElseThrow().location())
-                        .collect(Collectors.toSet()),
+                caveBiomes,
                 strucutreRegistry.keySet(),
                 StreamSupport.stream(strucutreRegistry.getTagOrEmpty(DISPLAY_BY_DEFAULT).spliterator(), false)
                         .map(x -> x.unwrapKey().orElseThrow().location())
