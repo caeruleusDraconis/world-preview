@@ -462,10 +462,6 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewDisplayDataProvide
             );
         }
 
-        for (ResourceLocation i : caveBiomes) {
-            LOGGER.warn(" - {}", i);
-        }
-
         previewData = previewMappingData.generateMapData(
                 biomeRegistry.keySet(),
                 caveBiomes,
