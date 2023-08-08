@@ -31,8 +31,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.LINE_HEIGHT;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.LINE_VSPACE;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_HEIGHT;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_VSPACE;
 
 public class HeightmapTab implements Tab {
 

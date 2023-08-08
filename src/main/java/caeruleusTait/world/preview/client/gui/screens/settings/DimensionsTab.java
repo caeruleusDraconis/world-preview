@@ -21,8 +21,8 @@ import java.util.function.Consumer;
 
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_DIM_HEAD;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_DIM_TITLE;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.LINE_HEIGHT;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.LINE_VSPACE;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_HEIGHT;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_VSPACE;
 
 public class DimensionsTab implements Tab {
     private final Minecraft minecraft;

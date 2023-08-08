@@ -27,16 +27,16 @@ public class SettingsScreen extends Screen {
     public static final ResourceLocation LIGHT_DIRT_BACKGROUND = new ResourceLocation("textures/gui/light_dirt_background.png");
 
     private final Screen lastScreen;
-    private final PreviewTab previewTab;
+    private final PreviewContainer previewContainer;
 
     private TabManager tabManager;
     private TabNavigationBar tabNavigationBar;
     private GridLayout bottomButtons;
 
-    public SettingsScreen(Screen lastScreen, PreviewTab previewTab) {
+    public SettingsScreen(Screen lastScreen, PreviewContainer previewContainer) {
         super(SETTINGS_TITLE);
         this.lastScreen = lastScreen;
-        this.previewTab = previewTab;
+        this.previewContainer = previewContainer;
 
         this.tabManager = new TabManager(this::addRenderableWidget, this::removeWidget);
     }
@@ -47,9 +47,9 @@ public class SettingsScreen extends Screen {
                 .addTabs(
                         new GeneralTab(minecraft),
                         new SamplingTab(minecraft),
-                        new HeightmapTab(minecraft, previewTab.previewData()),
-                        new DimensionsTab(minecraft, previewTab.levelStemKeys()),
-                        new BiomesTab(minecraft, previewTab)
+                        new HeightmapTab(minecraft, previewContainer.previewData()),
+                        new DimensionsTab(minecraft, previewContainer.levelStemKeys()),
+                        new BiomesTab(minecraft, previewContainer)
                 )
                 .build();
         tabNavigationBar.selectTab(0, false);
@@ -99,7 +99,7 @@ public class SettingsScreen extends Screen {
 
     @Override
     public void onClose() {
-        Map<ResourceLocation, PreviewMappingData.ColorEntry> toWrite = previewTab.allBiomes()
+        Map<ResourceLocation, PreviewMappingData.ColorEntry> toWrite = previewContainer.allBiomes()
                 .stream()
                 .filter(x -> x.dataSource() == PreviewData.DataSource.CONFIG)
                 .collect(
@@ -111,8 +111,8 @@ public class SettingsScreen extends Screen {
         WorldPreview.get().writeUserColorConfig(toWrite);
 
         // Apply transient changes to the color data
-        previewTab.patchColorData();
-        previewTab.resetTabs();
+        previewContainer.patchColorData();
+        previewContainer.resetTabs();
 
         // Go back
         minecraft.setScreen(lastScreen);

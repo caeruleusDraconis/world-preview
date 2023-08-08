@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Objects;
 
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.*;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.*;
 
 public class StructuresList extends BaseObjectSelectionList<StructuresList.StructureEntry> {
 

@@ -2,7 +2,7 @@ package caeruleusTait.world.preview.client.gui.screens.settings;
 
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.color.PreviewData;
-import caeruleusTait.world.preview.client.gui.screens.PreviewTab;
+import caeruleusTait.world.preview.client.gui.screens.PreviewContainer;
 import caeruleusTait.world.preview.client.gui.widgets.ColorChooser;
 import caeruleusTait.world.preview.client.gui.widgets.WGCheckbox;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
@@ -34,11 +34,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.LINE_HEIGHT;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.LINE_VSPACE;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_HEIGHT;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_VSPACE;
 
 public class BiomesTab implements Tab {
-    private final PreviewTab previewTab;
+    private final PreviewContainer previewContainer;
     private final Minecraft minecraft;
     private final GridLayout layout = new GridLayout();
     private final BiomesList biomesList;
@@ -53,11 +53,11 @@ public class BiomesTab implements Tab {
     private final Button applyBtn;
     private final WGCheckbox isCaveCB;
 
-    public BiomesTab(Minecraft _minecraft, PreviewTab _previewTab) {
-        previewTab = _previewTab;
+    public BiomesTab(Minecraft _minecraft, PreviewContainer _previewTab) {
+        previewContainer = _previewTab;
         minecraft = _minecraft;
         final Font font = minecraft.font;
-        biomesList = new BiomesList(previewTab, minecraft, 100, 100, 0, 0, false);
+        biomesList = new BiomesList(previewContainer, minecraft, 100, 100, 0, 0, false);
         biomesListHolder = new AbstractSelectionListHolder<>(biomesList, 0, 0, 100, 100, SETTINGS_BIOMES_TITLE);
         toRender.add(biomesListHolder);
 
@@ -79,7 +79,7 @@ public class BiomesTab implements Tab {
                         FULL_WIDTH,
                         LINE_HEIGHT,
                         COLOR_LIST_FILTER,
-                        (b, v) -> biomesList.replaceEntries(v.apply(previewTab.allBiomes()))
+                        (b, v) -> biomesList.replaceEntries(v.apply(previewContainer.allBiomes()))
                 );
         toRender.add(filterCycleButton);
 
@@ -164,7 +164,7 @@ public class BiomesTab implements Tab {
                 statusLabel.setText(selectedEntry.statusComponent());
             }
         });
-        biomesList.setSelected(previewTab.allBiomes().isEmpty() ? null : previewTab.allBiomes().get(0));
+        biomesList.setSelected(previewContainer.allBiomes().isEmpty() ? null : previewContainer.allBiomes().get(0));
 
         layout.rowSpacing(LINE_VSPACE).columnSpacing(COLUMN_SPACING);
 
@@ -226,7 +226,7 @@ public class BiomesTab implements Tab {
         biomesListHolder.setSize(leftWidth, bottom - listTop - LINE_VSPACE);
         biomesList.setRenderBackground(true);
         biomesList.setRenderTopAndBottom(false);
-        biomesList.replaceEntries(filterCycleButton.getValue().apply(previewTab.allBiomes()));
+        biomesList.replaceEntries(filterCycleButton.getValue().apply(previewContainer.allBiomes()));
 
         colorChooser.setSquareSize(screenRectangle.width() / 4);
         colorChooser.setPosition(left + leftWidth + LINE_VSPACE * 2, top + ((bottom - top) / 2) - colorChooser.getHeight() / 2);

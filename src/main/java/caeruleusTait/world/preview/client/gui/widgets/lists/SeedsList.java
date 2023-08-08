@@ -1,6 +1,6 @@
 package caeruleusTait.world.preview.client.gui.widgets.lists;
 
-import caeruleusTait.world.preview.client.gui.screens.PreviewTab;
+import caeruleusTait.world.preview.client.gui.screens.PreviewContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -10,14 +10,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.*;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.*;
 
 public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
-    private final PreviewTab previewTab;
+    private final PreviewContainer previewContainer;
 
-    public SeedsList(Minecraft minecraft, PreviewTab previewTab, int width, int height, int x, int y) {
+    public SeedsList(Minecraft minecraft, PreviewContainer previewContainer, int width, int height, int x, int y) {
         super(minecraft, width, height, x, y, 24);
-        this.previewTab = previewTab;
+        this.previewContainer = previewContainer;
     }
 
     public SeedEntry createEntry(String seed) {
@@ -41,7 +41,7 @@ public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
         }
 
         private void deleteEntry(Button btn) {
-            seedsList.previewTab.deleteSeed(seed);
+            seedsList.previewContainer.deleteSeed(seed);
         }
 
         @Override
@@ -63,7 +63,7 @@ public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
             }
             if (i == 0 && d < seedsList.getRowRight() - 22) {
                 seedsList.setSelected(this);
-                seedsList.previewTab.setSeed(seed);
+                seedsList.previewContainer.setSeed(seed);
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 return true;
             } else {

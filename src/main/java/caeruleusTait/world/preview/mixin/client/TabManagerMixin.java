@@ -21,9 +21,9 @@ public abstract class TabManagerMixin {
             return;
         }
         if (tab instanceof PreviewTab previewTab) {
-            previewTab.start();
+            previewTab.mainScreenWidget().start();
         } else if (getCurrentTab() instanceof PreviewTab previewTab) {
-            previewTab.stop();
+            previewTab.mainScreenWidget().stop();
         }
     }
 

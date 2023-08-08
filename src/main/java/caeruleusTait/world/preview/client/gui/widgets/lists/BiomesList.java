@@ -2,7 +2,7 @@ package caeruleusTait.world.preview.client.gui.widgets.lists;
 
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.client.WorldPreviewClient;
-import caeruleusTait.world.preview.client.gui.screens.PreviewTab;
+import caeruleusTait.world.preview.client.gui.screens.PreviewContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
@@ -24,12 +24,12 @@ import static caeruleusTait.world.preview.WorldPreview.nativeColor;
 public class BiomesList extends BaseObjectSelectionList<BiomesList.BiomeEntry> {
     private Consumer<BiomeEntry> onBiomeSelected;
     private final boolean allowDeselecting;
-    private final PreviewTab previewTab;
+    private final PreviewContainer previewContainer;
 
-    public BiomesList(PreviewTab previewTab, Minecraft minecraft, int width, int height, int x, int y, boolean allowDeselecting) {
+    public BiomesList(PreviewContainer previewContainer, Minecraft minecraft, int width, int height, int x, int y, boolean allowDeselecting) {
         super(minecraft, width, height, x, y, 16);
         this.allowDeselecting = allowDeselecting;
-        this.previewTab = previewTab;
+        this.previewContainer = previewContainer;
     }
 
     public BiomeEntry createEntry(Holder.Reference<Biome> entry, short id, int color, int initialColor, boolean isCave, boolean initialIsCave, String explicitName, PreviewData.DataSource dataSource) {
@@ -140,8 +140,8 @@ public class BiomesList extends BaseObjectSelectionList<BiomesList.BiomeEntry> {
             return dataSource;
         }
 
-        public PreviewTab previewTab() {
-            return previewTab;
+        public PreviewContainer previewTab() {
+            return previewContainer;
         }
 
         @Override

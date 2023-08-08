@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewTab.LINE_HEIGHT;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_HEIGHT;
 
 public class SamplingTab extends GridLayoutTab {
     public SamplingTab(Minecraft minecraft) {
