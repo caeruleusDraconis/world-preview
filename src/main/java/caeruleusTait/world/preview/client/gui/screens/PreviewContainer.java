@@ -44,6 +44,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
@@ -333,11 +334,8 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     private WorldCreationContext previewWorldCreationContext() {
         WorldCreationContext wcContext = uiState.getSettings();
         WorldDataConfiguration worldDataConfiguration = wcContext.dataConfiguration();
-        // new WorldGenSettings(WorldOptions.defaultWithRandomSeed(), WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen())
 
         record Cookie(WorldGenSettings worldGenSettings) {}
-
-        // WorldGenSettings worldGenSettings = new WorldGenSettings(wcContext.options(), wcContext.selectedDimensions());
 
         PackRepository packRepository = ((CreateWorldScreenAccessor) createWorldScreen).invokeGetDataPackSelectionSettings(worldDataConfiguration).getSecond();
         WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, true);
@@ -345,7 +343,9 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         CompletableFuture<WorldCreationContext> completableFuture = WorldLoader.load(
                 initConfig,
                 dataLoadContext -> {
-                    WorldDimensions worldDimensions = WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen());
+                    WorldPreset worldPreset = uiState.getWorldType().preset().value();
+                    // WorldDimensions worldDimensions = WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen());
+                    WorldDimensions worldDimensions = worldPreset.createWorldDimensions();
                     WorldGenSettings worldGenSettings = new WorldGenSettings(wcContext.options(), worldDimensions);
                     return new WorldLoader.DataLoadOutput<>(
                             new Cookie(worldGenSettings),
