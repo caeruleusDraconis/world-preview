@@ -25,7 +25,6 @@ import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -133,6 +132,11 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
     @Override
     public void updateSeed(String newSeed) {
         uiState.setSeed(newSeed);
+    }
+
+    @Override
+    public boolean seedIsEditable() {
+        return true;
     }
 
     @Override

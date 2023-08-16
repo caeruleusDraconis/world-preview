@@ -23,6 +23,8 @@ public interface PreviewContainerDataProvider {
 
     void updateSeed(String newSeed);
 
+    boolean seedIsEditable();
+
     @Nullable Path tempDataPackDir();
 
     @Nullable MinecraftServer minecraftServer();

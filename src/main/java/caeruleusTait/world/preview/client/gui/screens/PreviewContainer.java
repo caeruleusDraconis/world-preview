@@ -132,6 +132,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         seedEdit.setValue(dataProvider.seed());
         seedEdit.setResponder(this::setSeed);
         seedEdit.setTooltip(Tooltip.create(SEED_LABEL));
+        seedEdit.active = dataProvider.seedIsEditable();
         toRender.add(seedEdit);
 
         // seedLabel = new WGLabel(font, 0, 0, 100, LINE_HEIGHT, WGLabel.TextAlignment.LEFT, SEED_LABEL, 0xFFFFFF);
@@ -144,6 +145,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                 this::randomizeSeed
         );
         randomSeedButton.setTooltip(Tooltip.create(BTN_RANDOM));
+        randomSeedButton.active = dataProvider.seedIsEditable();
         toRender.add(randomSeedButton);
 
         saveSeed = new ImageButton(

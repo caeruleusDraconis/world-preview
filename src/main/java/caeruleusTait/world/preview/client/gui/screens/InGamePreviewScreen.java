@@ -93,6 +93,11 @@ public class InGamePreviewScreen extends Screen implements PreviewContainerDataP
     }
 
     @Override
+    public boolean seedIsEditable() {
+        return false;
+    }
+
+    @Override
     public @Nullable Path tempDataPackDir() {
         return null;
     }
