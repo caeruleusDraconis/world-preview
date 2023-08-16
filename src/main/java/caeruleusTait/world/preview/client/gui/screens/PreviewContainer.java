@@ -7,6 +7,7 @@ import caeruleusTait.world.preview.backend.WorkManager;
 import caeruleusTait.world.preview.backend.color.ColorMap;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.color.PreviewMappingData;
+import caeruleusTait.world.preview.client.gui.PreviewContainerDataProvider;
 import caeruleusTait.world.preview.client.gui.PreviewDisplayDataProvider;
 import caeruleusTait.world.preview.client.gui.widgets.PreviewDisplay;
 import caeruleusTait.world.preview.client.gui.widgets.ToggleButton;
@@ -22,18 +23,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
-import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
-import net.minecraft.server.WorldLoader;
-import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
@@ -43,17 +40,14 @@ import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.levelgen.presets.WorldPreset;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,9 +72,8 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     public static final int LINE_HEIGHT = 20;
     public static final int LINE_VSPACE = 4;
 
+    private final PreviewContainerDataProvider dataProvider;
     private final Minecraft minecraft;
-    private final CreateWorldScreen createWorldScreen;
-    private final WorldCreationUiState uiState;
     private final WorldPreview worldPreview;
     private final WorldPreviewConfig cfg;
     private final WorkManager workManager;
@@ -118,18 +111,16 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
     private boolean inhibitUpdates = true;
     private boolean isUpdating = false;
-    private final Executor loadingExecutor = Executors.newFixedThreadPool(2);
     private final Executor reloadExecutor = Executors.newSingleThreadExecutor();
     private final AtomicInteger reloadRevision = new AtomicInteger(0);
 
     private final List<AbstractWidget> toRender = new ArrayList<>();
 
-    public PreviewContainer(CreateWorldScreen screen, int posX, int posY, int width, int height) {
+    public PreviewContainer(Screen screen, PreviewContainerDataProvider previewContainerDataProvider) {
         final Font font = ((ScreenAccessor) screen).getFont();
+        dataProvider = previewContainerDataProvider;
         minecraft = ((ScreenAccessor) screen).getMinecraft();
-        createWorldScreen = screen;
         allBiomes = new BiomesList.BiomeEntry[0];
-        uiState = ((CreateWorldScreenAccessor) screen).getUiState();
         worldPreview = WorldPreview.get();
         cfg = worldPreview.cfg();
         workManager = worldPreview.workManager();
@@ -138,7 +129,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
         seedEdit = new EditBox(font, 0, 0, 100, LINE_HEIGHT - 2, SEED_FIELD);
         seedEdit.setHint(SEED_FIELD);
-        seedEdit.setValue(uiState.getSeed());
+        seedEdit.setValue(dataProvider.seed());
         seedEdit.setResponder(this::setSeed);
         seedEdit.setTooltip(Tooltip.create(SEED_LABEL));
         toRender.add(seedEdit);
@@ -287,7 +278,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
             toggleCaves.selected = x == null && toggleCaves.selected;
             previewDisplay.setHighlightCaves(x == null && toggleCaves.selected);
         });
-        uiState.addListener(this::updateSettings);
+        dataProvider.registerSettingsChangeListener(this::updateSettings);
 
         onTabButtonChange(switchBiomes, DisplayType.BIOMES);
     }
@@ -324,51 +315,10 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         previewMappingData.update(missing);
         previewMappingData.update(defaults);
         previewMappingData.update(configured);
-        updateSettings(uiState);
+        updateSettings();
     }
 
-    /**
-     * Create a playground for mods to do their thing while minimizing the risk
-     * to the real world creation stuff.
-     */
-    private WorldCreationContext previewWorldCreationContext() {
-        WorldCreationContext wcContext = uiState.getSettings();
-        WorldDataConfiguration worldDataConfiguration = wcContext.dataConfiguration();
-
-        record Cookie(WorldGenSettings worldGenSettings) {}
-
-        PackRepository packRepository = ((CreateWorldScreenAccessor) createWorldScreen).invokeGetDataPackSelectionSettings(worldDataConfiguration).getSecond();
-        WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, true);
-        WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.INTEGRATED, 2);
-        CompletableFuture<WorldCreationContext> completableFuture = WorldLoader.load(
-                initConfig,
-                dataLoadContext -> {
-                    WorldPreset worldPreset = uiState.getWorldType().preset().value();
-                    // WorldDimensions worldDimensions = WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen());
-                    WorldDimensions worldDimensions = worldPreset.createWorldDimensions();
-                    WorldGenSettings worldGenSettings = new WorldGenSettings(wcContext.options(), worldDimensions);
-                    return new WorldLoader.DataLoadOutput<>(
-                            new Cookie(worldGenSettings),
-                            dataLoadContext.datapackDimensions()
-                    );
-                }
-                ,
-                (closeableResourceManager, reloadableServerResources, layeredRegistryAccess, cookie) -> {
-                    closeableResourceManager.close();
-                    return new WorldCreationContext(cookie.worldGenSettings, layeredRegistryAccess, reloadableServerResources, worldDataConfiguration);
-                },
-                loadingExecutor,
-                loadingExecutor
-        );
-
-        try {
-            return completableFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private synchronized void updateSettings(WorldCreationUiState ignore) {
+    private synchronized void updateSettings() {
         if (inhibitUpdates) {
             return;
         }
@@ -386,7 +336,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                             return null;
                         }
                         try {
-                            return previewWorldCreationContext();
+                            return dataProvider.previewWorldCreationContext();
                         } catch (Throwable e) {
                             e.printStackTrace();
                             throw e;
@@ -394,7 +344,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                     }, reloadExecutor)
                     .thenAcceptAsync(x -> {
                         // Check if we are the latest update
-                        if (reloadRevision.get() > revision || x == null) {
+                        if (reloadRevision.get() > revision) {
                             return;
                         }
                         try {
@@ -414,10 +364,10 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         }
     }
 
-    private void updateSettings_real(WorldCreationContext wcContext) {
-        saveSeed.active = !uiState.getSeed().isEmpty() && !cfg.savedSeeds.contains(uiState.getSeed());
+    private void updateSettings_real(@Nullable WorldCreationContext wcContext) {
+        saveSeed.active = !dataProvider.seed().isEmpty() && !cfg.savedSeeds.contains(dataProvider.seed());
         updateSeedListWidget();
-        seedEdit.setValue(uiState.getSeed());
+        seedEdit.setValue(dataProvider.seed());
         if (!seedEdit.isFocused()) {
             seedEdit.moveCursorToStart();
         }
@@ -432,11 +382,10 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         }
 
         // Basic world loading / generation setup
-        WorldDataConfiguration worldDataConfiguration = wcContext.dataConfiguration();
-        Registry<Biome> biomeRegistry = wcContext.worldgenLoadContext().registryOrThrow(Registries.BIOME);
-        Registry<Structure> strucutreRegistry = wcContext.worldgenLoadContext().registryOrThrow(Registries.STRUCTURE);
-        WorldDimensions.Complete worldDimensions = wcContext.selectedDimensions().bake(wcContext.datapackDimensions());
-        levelStemRegistry = worldDimensions.dimensions();
+        WorldDataConfiguration worldDataConfiguration = dataProvider.worldDataConfiguration(wcContext);
+        Registry<Biome> biomeRegistry = dataProvider.registryAccess(wcContext).registryOrThrow(Registries.BIOME);
+        Registry<Structure> strucutreRegistry = dataProvider.registryAccess(wcContext).registryOrThrow(Registries.STRUCTURE);
+        levelStemRegistry = dataProvider.levelStemRegistry(wcContext);
         levelStemKeys = levelStemRegistry.keySet().stream().sorted(Comparator.comparing(Object::toString)).toList();
 
         // Now that the level stem keys are loaded, allow the user to go into properties!
@@ -476,19 +425,18 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         }
 
         // WorkManager update
-        LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = wcContext
-                .worldgenRegistries()
-                .replaceFrom(RegistryLayer.DIMENSIONS, worldDimensions.dimensionsRegistryAccess());
+        LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = dataProvider.layeredRegistryAccess(wcContext);
 
         workManager.cancel();
         workManager.changeWorldGenState(
                 levelStem,
                 layeredRegistryAccess,
                 previewData,
-                wcContext.options(),
+                dataProvider.worldOptions(wcContext),
                 worldDataConfiguration,
                 minecraft.getProxy(),
-                ((CreateWorldScreenAccessor) createWorldScreen).invokeGetTempDataPackDir()
+                dataProvider.tempDataPackDir(),
+                dataProvider.minecraftServer()
         );
 
         // Biomes
@@ -651,7 +599,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     }
 
     private void saveCurrentSeed(Button btn) {
-        cfg.savedSeeds.add(uiState.getSeed());
+        cfg.savedSeeds.add(dataProvider.seed());
         saveSeed.active = false;
         updateSeedListWidget();
     }
@@ -662,24 +610,24 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     }
 
     public void setSeed(String seed) {
-        if (Objects.equals(uiState.getSeed(), seed)) {
+        if (Objects.equals(dataProvider.seed(), seed)) {
             return;
         }
 
         boolean initialInhibitUpdates = inhibitUpdates;
         inhibitUpdates = true;
         try {
-            uiState.setSeed(seed);
+            dataProvider.updateSeed(seed);
         } finally {
             inhibitUpdates = initialInhibitUpdates;
         }
-        updateSettings(null);
+        updateSettings();
     }
 
     private void updateSeedListWidget() {
         seedEntries = cfg.savedSeeds.stream().map(seedsList::createEntry).toList();
         seedsList.replaceEntries(seedEntries);
-        int idx = cfg.savedSeeds.indexOf(uiState.getSeed());
+        int idx = cfg.savedSeeds.indexOf(dataProvider.seed());
         if (idx >= 0) {
             seedsList.setSelected(seedEntries.get(idx));
         }
@@ -723,11 +671,11 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
      */
     public synchronized void start() {
         LOGGER.info("Start generating biome data...");
-        if (uiState.getSeed().isEmpty()) {
+        if (dataProvider.seed().isEmpty()) {
             randomizeSeed(null);
         }
         inhibitUpdates = false;
-        updateSettings(uiState);
+        updateSettings();
     }
 
     /**

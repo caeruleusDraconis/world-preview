@@ -4,6 +4,7 @@
   "minVersion": "0.8",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "MinecraftServerAccessor",
     "NoiseBasedAquiferMixin",
     "NoiseBasedChunkGeneratorAccessor",
     "NoiseChunkAccessor",
@@ -14,6 +15,7 @@
   "client": [
     "client.CreateWorldScreenAccessor",
     "client.CreateWorldScreenMixin",
+    "client.PauseScreenMixin",
     "client.ScreenAccessor",
     "client.TabManagerMixin",
     "client.TabNavigationBarAccessor",

@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.ChunkPos;
@@ -90,7 +91,8 @@ public class WorkManager {
             WorldOptions _worldOptions,
             WorldDataConfiguration _worldDataConfiguration,
             Proxy proxy,
-            @Nullable Path tempDataPackDir
+            @Nullable Path tempDataPackDir,
+            @Nullable MinecraftServer server
     ) {
         cancel();
         levelStem = _levelStem;
@@ -120,18 +122,30 @@ public class WorkManager {
 
         LevelHeightAccessor levelHeightAccessor = LevelHeightAccessor.create(dimensionType.minY(), dimensionType.height());
         try {
-            sampleUtils = new SampleUtils(
-                    biomeSource,
-                    randomState,
-                    chunkGenerator,
-                    _registryAccess,
-                    _worldOptions,
-                    levelStem,
-                    levelHeightAccessor,
-                    _worldDataConfiguration,
-                    proxy,
-                    tempDataPackDir
-            );
+            if (server == null) {
+                sampleUtils = new SampleUtils(
+                        biomeSource,
+                        randomState,
+                        chunkGenerator,
+                        _registryAccess,
+                        _worldOptions,
+                        levelStem,
+                        levelHeightAccessor,
+                        _worldDataConfiguration,
+                        proxy,
+                        tempDataPackDir
+                );
+            } else {
+                sampleUtils = new SampleUtils(
+                        server,
+                        biomeSource,
+                        randomState,
+                        chunkGenerator,
+                        _worldOptions,
+                        levelStem,
+                        levelHeightAccessor
+                );
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

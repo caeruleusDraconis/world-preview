@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 public class WorldPreviewComponents {
     // Main view components
     public static final Component TITLE = Component.translatable("world_preview.preview.title");
+    public static final Component TITLE_FULL = Component.translatable("world_preview.preview.title-full");
     public static final Component SEED_FIELD = Component.translatable("world_preview.preview.seed-field");
     public static final Component SEED_LABEL = Component.translatable("world_preview.preview.seed-label");
     public static final Component BTN_RANDOM = Component.translatable("world_preview.preview.btn-random");

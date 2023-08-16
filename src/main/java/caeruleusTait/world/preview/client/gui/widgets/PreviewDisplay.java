@@ -651,12 +651,17 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (delta > 0.0) {
-            renderSettings.decrementY();
-        } else if (delta < 0.0) {
-            renderSettings.incrementY();
+        synchronized (dataProvider) {
+            if (dataProvider.isUpdating()) {
+                return true;
+            }
+            if (delta > 0.0) {
+                renderSettings.decrementY();
+            } else if (delta < 0.0) {
+                renderSettings.incrementY();
+            }
+            return true;
         }
-        return true;
     }
 
     private static int textureColor(int orig) {

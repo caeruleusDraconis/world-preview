@@ -1,5 +1,6 @@
 {
   "world_preview.preview.title": "Preview",
+  "world_preview.preview.title-full": "World Preview",
   "world_preview.preview.seed-field": "World seed...",
   "world_preview.preview.seed-label": "The world seed",
   "world_preview.preview.btn-random": "Generate a random seed",

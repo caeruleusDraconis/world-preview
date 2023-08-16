@@ -4,6 +4,7 @@ import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.storage.PreviewLevel;
 import caeruleusTait.world.preview.backend.stubs.DummyMinecraftServer;
 import caeruleusTait.world.preview.backend.stubs.EmptyAquifer;
+import caeruleusTait.world.preview.mixin.MinecraftServerAccessor;
 import caeruleusTait.world.preview.mixin.NoiseBasedChunkGeneratorAccessor;
 import caeruleusTait.world.preview.mixin.NoiseChunkAccessor;
 import com.mojang.datafixers.DataFixer;
@@ -28,10 +29,7 @@ import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
-import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.blending.Blender;
@@ -44,6 +42,7 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.validation.DirectoryValidator;
 import net.minecraft.world.level.validation.PathAllowList;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -62,11 +61,9 @@ import static net.minecraft.core.registries.Registries.LEVEL_STEM;
 public class SampleUtils implements AutoCloseable {
     private final Path tempDir;
     private final DataFixer dataFixer;
-    private final LevelStorageSource levelStorageSource;
     private final LevelStorageSource.LevelStorageAccess levelStorageAccess;
     private final LevelHeightAccessor levelHeightAccessor;
     private final CloseableResourceManager resourceManager;
-    private final PackRepository packRepository;
     private final BiomeSource biomeSource;
     private final RandomState randomState;
     private final ChunkGenerator chunkGenerator;
@@ -79,6 +76,59 @@ public class SampleUtils implements AutoCloseable {
     private final Registry<Structure> structureRegistry;
     private final NoiseGeneratorSettings noiseGeneratorSettings;
     private final MinecraftServer minecraftServer;
+
+    public SampleUtils(
+            @NotNull MinecraftServer server,
+            BiomeSource biomeSource,
+            RandomState randomState,
+            ChunkGenerator chunkGenerator,
+            WorldOptions worldOptions,
+            LevelStem levelStem,
+            LevelHeightAccessor levelHeightAccessor
+    ) throws IOException {
+        this.tempDir = null;
+        this.minecraftServer = server;
+        this.dataFixer = minecraftServer.getFixerUpper();
+        this.levelStorageAccess = ((MinecraftServerAccessor) minecraftServer).getStorageSource();
+
+        this.levelHeightAccessor = levelHeightAccessor;
+        this.resourceManager = (CloseableResourceManager) minecraftServer.getResourceManager();
+        this.biomeSource = biomeSource;
+        this.randomState = randomState;
+        this.chunkGenerator = chunkGenerator;
+        this.registryAccess = minecraftServer.registryAccess();
+        this.structureRegistry = this.registryAccess.registryOrThrow(Registries.STRUCTURE);
+        this.structureTemplateManager = minecraftServer.getStructureManager();
+        this.previewLevel = new PreviewLevel(this.registryAccess, this.levelHeightAccessor);
+
+        ResourceKey<LevelStem> levelStemResourceKey = this.registryAccess.registryOrThrow(LEVEL_STEM).getResourceKey(levelStem).orElseThrow();
+        ResourceKey<Level> levelResourceKey = Registries.levelStemToLevel(levelStemResourceKey);
+
+        this.structureCheck = new StructureCheck(
+                null, // Should never be required because `tryLoadFromStorage` must not be called
+                this.registryAccess,
+                this.structureTemplateManager,
+                levelResourceKey,
+                this.chunkGenerator,
+                this.randomState,
+                this.levelHeightAccessor,
+                chunkGenerator.getBiomeSource(),
+                worldOptions.seed(),
+                dataFixer
+        );
+        this.structureManager = new StructureManager(previewLevel, worldOptions, structureCheck);
+        this.chunkGeneratorStructureState = this.chunkGenerator.createState(
+                this.registryAccess.lookupOrThrow(Registries.STRUCTURE_SET),
+                this.randomState,
+                worldOptions.seed()
+        );
+
+        if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
+            noiseGeneratorSettings = noiseBasedChunkGenerator.generatorSettings().value();
+        } else {
+            noiseGeneratorSettings = null;
+        }
+    }
 
     public SampleUtils(
             BiomeSource biomeSource,
@@ -99,7 +149,7 @@ public class SampleUtils implements AutoCloseable {
         }
 
         this.dataFixer = DataFixers.getDataFixer();
-        this.levelStorageSource = new LevelStorageSource(tempDir, tempDir.resolve("backups"), new DirectoryValidator(new PathAllowList(List.of())), dataFixer);
+        LevelStorageSource levelStorageSource = new LevelStorageSource(tempDir, tempDir.resolve("backups"), new DirectoryValidator(new PathAllowList(List.of())), dataFixer);
         this.levelStorageAccess = levelStorageSource.createAccess("world_preview");
         this.levelHeightAccessor = levelHeightAccessor;
 
@@ -129,7 +179,7 @@ public class SampleUtils implements AutoCloseable {
                 worldOptions.seed()
         );
 
-        packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
+        PackRepository packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
         resourceManager = (new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, false)).createResourceManager().getSecond();
 
         HolderGetter<Block> holderGetter = this.registryAccess.registryOrThrow(Registries.BLOCK).asLookup().filterFeatures(worldDataConfiguration.enabledFeatures());
@@ -259,8 +309,12 @@ public class SampleUtils implements AutoCloseable {
     @Override
     public void close() throws Exception {
         // FileUtils.deleteDirectory(tempDir.toFile());
-        WorldPreview.get().loaderSpecificTeardown(minecraftServer);
-        deleteDirectoryLegacyIO(tempDir.toFile());
+        if (minecraftServer instanceof DummyMinecraftServer) {
+            WorldPreview.get().loaderSpecificTeardown(minecraftServer);
+        }
+        if (tempDir != null) {
+            deleteDirectoryLegacyIO(tempDir.toFile());
+        }
     }
 
     // Source https://mkyong.com/java/how-to-delete-directory-in-java/
