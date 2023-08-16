@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Mixin(StructureTemplate.Palette.class)
-public class StructureTemplatePaletteMixin {
+public abstract class StructureTemplatePaletteMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    void threadSafeCache(List<StructureTemplate.StructureBlockInfo> list, CallbackInfo ci) {
+    private void threadSafeCache(List<StructureTemplate.StructureBlockInfo> list, CallbackInfo ci) {
         if (WorldPreview.get().workManager().isSetup()) {
             ((StructureTemplatePaletteAccessor) this).setCache(new ConcurrentHashMap<>());
         }
