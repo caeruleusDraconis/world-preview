@@ -34,6 +34,15 @@ When height sampling is enabled, the preview can be toggled between the biome ma
 
 <img alt="heightmap" src="img/heightmap.png" width="100%"/>
 
+When y-layer intersection sampling is enabled, the preview can also show the blocks on the current y-layer.
+Additionally, the y-layer one step below is also shown in a lighter color:
+
+<img alt="heightmap" src="img/y-int.png" width="100%"/>
+
+Since version 1.1.0, there is also experimental support for opening the preview in-game for a single-player worlds:
+
+<img alt="ingame" src="img/ingame.png" width="100%"/>
+
 ##### Moving on the preview
 
 Clicking and dragging on the map-part of the preview tab will move along the x and z axis.
@@ -74,6 +83,12 @@ This table shows the current support status for the Minecraft version.
 **Q:** *Scrolling does not zoom the preview!*
 
 **A:** Scrolling moves the y-level up and down. To change the zoom level, go to `Settings (top left wrench) -> Resolution` and change the visual size of a chunk.
+
+---
+
+**Q:** *The preview is completely white / black for the y-intersections view.*
+
+**A:** This is likely because the starting y-layer for the preview is the build limit. Try scrolling down to a lower y-layer and something should show up.
 
 ---
 
