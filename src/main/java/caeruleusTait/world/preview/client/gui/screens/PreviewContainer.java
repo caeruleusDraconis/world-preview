@@ -15,7 +15,6 @@ import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionLis
 import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.SeedsList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.StructuresList;
-import caeruleusTait.world.preview.mixin.client.CreateWorldScreenAccessor;
 import caeruleusTait.world.preview.mixin.client.ScreenAccessor;
 import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
@@ -39,7 +38,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import org.jetbrains.annotations.Nullable;
 
@@ -211,7 +209,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         structuresListHolder.visible = false;
         toRender.add(structuresListHolder);
 
-        seedsList = new SeedsList(minecraft, this, 200, 300, 4, 100);
+        seedsList = new SeedsList(minecraft, this);
         seedsListHolder = new AbstractSelectionListHolder<>(seedsList, 0, 0, screen.width, screen.height, TITLE);
         seedsListHolder.visible = false;
         updateSeedListWidget();
@@ -612,7 +610,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     }
 
     public void setSeed(String seed) {
-        if (Objects.equals(dataProvider.seed(), seed)) {
+        if (Objects.equals(dataProvider.seed(), seed) || !dataProvider.seedIsEditable()) {
             return;
         }
 
@@ -864,6 +862,10 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
     public ToggleButton toggleIntersections() {
         return toggleIntersections;
+    }
+
+    public PreviewContainerDataProvider dataProvider() {
+        return dataProvider;
     }
 
     public enum DisplayType {

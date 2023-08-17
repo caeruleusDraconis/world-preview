@@ -14,10 +14,12 @@ import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.*;
 
 public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
     private final PreviewContainer previewContainer;
+    private final boolean seedCanChange;
 
-    public SeedsList(Minecraft minecraft, PreviewContainer previewContainer, int width, int height, int x, int y) {
-        super(minecraft, width, height, x, y, 24);
+    public SeedsList(Minecraft minecraft, PreviewContainer previewContainer) {
+        super(minecraft, 100, 100, 0, 0, 24);
         this.previewContainer = previewContainer;
+        this.seedCanChange = this.previewContainer.dataProvider().seedIsEditable();
     }
 
     public SeedEntry createEntry(String seed) {
@@ -38,6 +40,7 @@ public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
                     BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
                     this::deleteEntry
             );
+            this.deleteButton.active = seedCanChange;
         }
 
         private void deleteEntry(Button btn) {
@@ -51,15 +54,18 @@ public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
 
         @Override
         public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean bl, float partialTick) {
-            guiGraphics.drawString(seedsList.minecraft.font, seed, left + 4, top + 6, 0xFFFFFF);
+            guiGraphics.drawString(seedsList.minecraft.font, seed, left + 4, top + 6, seedCanChange ? 0xFFFFFF : 0x999999);
             deleteButton.setPosition(seedsList.getRowRight() - 22, top);
             deleteButton.render(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         @Override
         public boolean mouseClicked(double d, double e, int i) {
+            if (!seedCanChange) {
+                return true;
+            }
             if (deleteButton.isHovered()) {
-                deleteButton.onClick(d, e);
+                deleteButton.mouseClicked(d, e, i);
             }
             if (i == 0 && d < seedsList.getRowRight() - 22) {
                 seedsList.setSelected(this);
