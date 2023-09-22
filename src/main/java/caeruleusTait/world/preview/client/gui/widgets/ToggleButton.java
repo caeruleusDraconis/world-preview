@@ -7,7 +7,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class ToggleButton extends ImageButton {
+public class ToggleButton extends OldStyleImageButton {
     public boolean selected;
     protected final int xDiff;
 
@@ -17,10 +17,6 @@ public class ToggleButton extends ImageButton {
 
     public ToggleButton(int x, int y, int width, int height, int xTexStart, int yTexStart, int xDiff, int yDiff, ResourceLocation resourceLocation, OnPress onPress) {
         this(x, y, width, height, xTexStart, yTexStart, xDiff, yDiff, resourceLocation, 256, 256, onPress);
-    }
-
-    public ToggleButton(int x, int y, int width, int height, int xTexStart, int yTexStart, int xDiff, int yDiff, ResourceLocation resourceLocation, int texWidth, int texHeight, OnPress onPress) {
-        this(x, y, width, height, xTexStart, yTexStart, xDiff, yDiff, resourceLocation, texWidth, texHeight, onPress, CommonComponents.EMPTY);
     }
 
     public ToggleButton(
@@ -35,10 +31,9 @@ public class ToggleButton extends ImageButton {
             ResourceLocation resourceLocation,
             int texWidth,
             int texHeight,
-            OnPress onPress,
-            Component component
+            OnPress onPress
     ) {
-        super(x, y, width, height, xTexStart, yTexStart, yDiff, resourceLocation, texWidth, texHeight, onPress, component);
+        super(x, y, width, height, xTexStart, yTexStart, yDiff, resourceLocation, texWidth, texHeight, onPress);
         this.xDiff = xDiff;
     }
 
@@ -55,8 +50,10 @@ public class ToggleButton extends ImageButton {
             y += yDiffTex;
         }
 
-        RenderSystem.disableDepthTest();
-        guiGraphics.blit(resourceLocation, getX(), getY(), x, y, width, height, textureWidth, textureHeight);
+        guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
+        RenderSystem.enableBlend();
+        RenderSystem.enableDepthTest();
+        guiGraphics.blit(texture, getX(), getY(), x, y, width, height, texWidth, texHeight);
     }
 
     @Override

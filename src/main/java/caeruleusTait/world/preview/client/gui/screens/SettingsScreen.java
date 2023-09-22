@@ -93,11 +93,6 @@ public class SettingsScreen extends Screen {
     }
 
     @Override
-    public void tick() {
-        this.tabManager.tickCurrent();
-    }
-
-    @Override
     public void onClose() {
         Map<ResourceLocation, PreviewMappingData.ColorEntry> toWrite = previewContainer.allBiomes()
                 .stream()

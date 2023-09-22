@@ -198,7 +198,6 @@ public class HeightmapTab implements Tab {
         heightPresetListHolder.setPosition(leftL, topL);
         heightPresetListHolder.setSize(secWidth, bottomL - topL - LINE_VSPACE);
         heightPresetList.setRenderBackground(true);
-        heightPresetList.setRenderTopAndBottom(false);
 
         // RIGHT COLUMN
         //  - TOP
@@ -210,7 +209,6 @@ public class HeightmapTab implements Tab {
         colormapListHolder.setPosition(leftR, topR);
         colormapListHolder.setSize(secWidth, bottomR - topR + LINE_HEIGHT);
         colormapList.setRenderBackground(true);
-        colormapList.setRenderTopAndBottom(false);
     }
 
 

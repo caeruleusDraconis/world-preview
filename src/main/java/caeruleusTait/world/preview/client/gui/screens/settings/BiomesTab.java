@@ -225,7 +225,6 @@ public class BiomesTab implements Tab {
         biomesListHolder.setPosition(left, listTop);
         biomesListHolder.setSize(leftWidth, bottom - listTop - LINE_VSPACE);
         biomesList.setRenderBackground(true);
-        biomesList.setRenderTopAndBottom(false);
         biomesList.replaceEntries(filterCycleButton.getValue().apply(previewContainer.allBiomes()));
 
         colorChooser.setSquareSize(screenRectangle.width() / 4);

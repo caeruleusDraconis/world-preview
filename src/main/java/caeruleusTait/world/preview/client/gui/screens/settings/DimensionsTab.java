@@ -69,7 +69,6 @@ public class DimensionsTab implements Tab {
         dimensionListHolder.setPosition(left, top);
         dimensionListHolder.setSize(width, bottom - top);
         dimensionList.setRenderBackground(true);
-        dimensionList.setRenderTopAndBottom(false);
     }
 
     public class DimensionList extends BaseObjectSelectionList<DimensionList.DimensionEntry> {

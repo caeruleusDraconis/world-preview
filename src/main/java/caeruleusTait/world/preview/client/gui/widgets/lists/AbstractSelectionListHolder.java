@@ -51,8 +51,8 @@ public class AbstractSelectionListHolder<E extends BaseObjectSelectionList.Entry
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        return this.visible && theList.mouseScrolled(mouseX, mouseY, delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
+        return this.visible && theList.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
     }
 
     @Override

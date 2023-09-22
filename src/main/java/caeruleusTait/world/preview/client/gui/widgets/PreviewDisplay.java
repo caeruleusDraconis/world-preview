@@ -650,14 +650,14 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
         synchronized (dataProvider) {
             if (dataProvider.isUpdating()) {
                 return true;
             }
-            if (delta > 0.0) {
+            if ((deltaX + deltaY) > 0.0) {
                 renderSettings.decrementY();
-            } else if (delta < 0.0) {
+            } else if ((deltaX + deltaY) < 0.0) {
                 renderSettings.incrementY();
             }
             return true;

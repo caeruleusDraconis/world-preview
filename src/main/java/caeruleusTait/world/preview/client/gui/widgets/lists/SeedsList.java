@@ -1,6 +1,7 @@
 package caeruleusTait.world.preview.client.gui.widgets.lists;
 
 import caeruleusTait.world.preview.client.gui.screens.PreviewContainer;
+import caeruleusTait.world.preview.client.gui.widgets.OldStyleImageButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -34,7 +35,7 @@ public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
         public SeedEntry(SeedsList seedsList, String seed) {
             this.seedsList = seedsList;
             this.seed = seed;
-            this.deleteButton = new ImageButton(
+            this.deleteButton = new OldStyleImageButton(
                     0, 0, 20, 20, /* x, y, width, height */
                     40, 20, 20, /* xTexStart, yTexStart, yDiffTex */
                     BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/

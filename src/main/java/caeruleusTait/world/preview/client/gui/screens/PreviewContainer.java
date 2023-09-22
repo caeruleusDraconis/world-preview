@@ -9,6 +9,7 @@ import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.color.PreviewMappingData;
 import caeruleusTait.world.preview.client.gui.PreviewContainerDataProvider;
 import caeruleusTait.world.preview.client.gui.PreviewDisplayDataProvider;
+import caeruleusTait.world.preview.client.gui.widgets.OldStyleImageButton;
 import caeruleusTait.world.preview.client.gui.widgets.PreviewDisplay;
 import caeruleusTait.world.preview.client.gui.widgets.ToggleButton;
 import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
@@ -136,7 +137,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         // seedLabel = new WGLabel(font, 0, 0, 100, LINE_HEIGHT, WGLabel.TextAlignment.LEFT, SEED_LABEL, 0xFFFFFF);
         // toRender.add(seedLabel);
 
-        randomSeedButton = new ImageButton(
+        randomSeedButton = new OldStyleImageButton(
                 0, 0, 20, 20, /* x, y, width, height */
                 0, 20, 20, /* xTexStart, yTexStart, yDiffTex */
                 BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
@@ -146,7 +147,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         randomSeedButton.active = dataProvider.seedIsEditable();
         toRender.add(randomSeedButton);
 
-        saveSeed = new ImageButton(
+        saveSeed = new OldStyleImageButton(
                 0, 0, 20, 20, /* x, y, width, height */
                 20, 20, 20, /* xTexStart, yTexStart, yDiffTex */
                 BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
@@ -156,7 +157,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         saveSeed.active = false;
         toRender.add(saveSeed);
 
-        settings = new ImageButton(
+        settings = new OldStyleImageButton(
                 0, 0, 20, 20, /* x, y, width, height */
                 60, 20, 20, /* xTexStart, yTexStart, yDiffTex */
                 BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
@@ -169,7 +170,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         settings.active = false; // Do not allow clicking away until we loaded levelStemKeys
         toRender.add(settings);
 
-        resetToZeroZero = new ImageButton(
+        resetToZeroZero = new OldStyleImageButton(
                 0, 0, 20, 20, /* x, y, width, height */
                 120, 20, 20, /* xTexStart, yTexStart, yDiffTex */
                 BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
@@ -369,7 +370,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         updateSeedListWidget();
         seedEdit.setValue(dataProvider.seed());
         if (!seedEdit.isFocused()) {
-            seedEdit.moveCursorToStart();
+            seedEdit.moveCursorToStart(false);
         }
 
         // Range validation
@@ -740,12 +741,10 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         biomesListHolder.setPosition(left, top);
         biomesListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
         biomesList.setRenderBackground(true);
-        biomesList.setRenderTopAndBottom(false);
 
         seedsListHolder.setPosition(left, top);
         seedsListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
         seedsList.setRenderBackground(true);
-        seedsList.setRenderTopAndBottom(false);
 
         // BOTTOM
         //  - new row
@@ -757,7 +756,6 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         structuresListHolder.setPosition(left, top);
         structuresListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
         structuresList.setRenderBackground(true);
-        structuresList.setRenderTopAndBottom(false);
     }
 
     public void close() {
