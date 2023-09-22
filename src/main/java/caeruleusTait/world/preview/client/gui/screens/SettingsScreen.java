@@ -82,7 +82,6 @@ public class SettingsScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderDirtBackground(guiGraphics);
         guiGraphics.blit(FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
         super.render(guiGraphics, i, j, f);
     }
@@ -90,6 +89,11 @@ public class SettingsScreen extends Screen {
     @Override
     public void renderDirtBackground(GuiGraphics guiGraphics) {
         guiGraphics.blit(LIGHT_DIRT_BACKGROUND, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, 32, 32);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+        renderDirtBackground(guiGraphics);
     }
 
     @Override
