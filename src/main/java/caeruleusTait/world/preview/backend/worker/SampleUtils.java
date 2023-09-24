@@ -3,6 +3,7 @@ package caeruleusTait.world.preview.backend.worker;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.storage.PreviewLevel;
 import caeruleusTait.world.preview.backend.stubs.DummyMinecraftServer;
+import caeruleusTait.world.preview.backend.stubs.DummyServerLevelData;
 import caeruleusTait.world.preview.backend.stubs.EmptyAquifer;
 import caeruleusTait.world.preview.mixin.MinecraftServerAccessor;
 import caeruleusTait.world.preview.mixin.NoiseBasedChunkGeneratorAccessor;
@@ -18,6 +19,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.*;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
@@ -27,9 +29,13 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.blending.Blender;
@@ -53,6 +59,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
@@ -76,6 +83,7 @@ public class SampleUtils implements AutoCloseable {
     private final Registry<Structure> structureRegistry;
     private final NoiseGeneratorSettings noiseGeneratorSettings;
     private final MinecraftServer minecraftServer;
+    private final ServerLevel serverLevel;
 
     public SampleUtils(
             @NotNull MinecraftServer server,
@@ -128,6 +136,7 @@ public class SampleUtils implements AutoCloseable {
         } else {
             noiseGeneratorSettings = null;
         }
+        serverLevel = null;
     }
 
     public SampleUtils(
@@ -173,11 +182,6 @@ public class SampleUtils implements AutoCloseable {
         this.registryAccess = layeredRegistryAccess.compositeAccess();
         this.structureRegistry = this.registryAccess.registryOrThrow(Registries.STRUCTURE);
         this.previewLevel = new PreviewLevel(this.registryAccess, this.levelHeightAccessor);
-        this.chunkGeneratorStructureState = this.chunkGenerator.createState(
-                this.registryAccess.lookupOrThrow(Registries.STRUCTURE_SET),
-                this.randomState,
-                worldOptions.seed()
-        );
 
         PackRepository packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
         resourceManager = (new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, false)).createResourceManager().getSecond();
@@ -208,6 +212,28 @@ public class SampleUtils implements AutoCloseable {
         ReloadableServerResources reloadableServerResources = new ReloadableServerResources(layeredRegistryAccess.compositeAccess(), FeatureFlagSet.of(), Commands.CommandSelection.ALL, 0);
         WorldStem worldStem = new WorldStem(resourceManager, reloadableServerResources, layeredRegistryAccess, primaryLevelData);
 
+        final ChunkProgressListener chunkProgressListener = new ChunkProgressListener() {
+            @Override
+            public void updateSpawnPos(ChunkPos center) {
+
+            }
+
+            @Override
+            public void onStatusChange(ChunkPos chunkPosition, @Nullable ChunkStatus newStatus) {
+
+            }
+
+            @Override
+            public void start() {
+
+            }
+
+            @Override
+            public void stop() {
+
+            }
+        };
+
         minecraftServer = new DummyMinecraftServer(
                 null,
                 levelStorageAccess,
@@ -216,23 +242,7 @@ public class SampleUtils implements AutoCloseable {
                 proxy,
                 dataFixer,
                 new Services(null, null, null, null),
-                i -> new ChunkProgressListener() {
-                    @Override
-                    public void updateSpawnPos(ChunkPos center) {
-                    }
-
-                    @Override
-                    public void onStatusChange(ChunkPos chunkPosition, @Nullable ChunkStatus newStatus) {
-                    }
-
-                    @Override
-                    public void start() {
-                    }
-
-                    @Override
-                    public void stop() {
-                    }
-                }
+                i -> chunkProgressListener
         );
 
         // Noise / Heightmap stuff
@@ -245,8 +255,30 @@ public class SampleUtils implements AutoCloseable {
         // All this stuff, just so we can give Forge a fake minecraft server...
         WorldPreview.get().loaderSpecificSetup(minecraftServer);
 
+        this.chunkGeneratorStructureState = this.chunkGenerator.createState(
+                this.registryAccess.lookupOrThrow(Registries.STRUCTURE_SET),
+                this.randomState,
+                worldOptions.seed()
+        );
+
         // Initialize early
         chunkGeneratorStructureState.ensureStructuresGenerated();
+
+        // Create fake , to trigger mixins for some mods...
+        serverLevel = new ServerLevel(
+                minecraftServer,
+                Executors.newSingleThreadExecutor(),
+                levelStorageAccess,
+                new DummyServerLevelData(),
+                levelResourceKey,
+                levelStem,
+                chunkProgressListener,
+                false, // is Debug
+                BiomeManager.obfuscateSeed(worldOptions.seed()),
+                List.of(),
+                false,
+                null
+            );
     }
 
     public ResourceKey<Biome> doSample(BlockPos pos) {
@@ -309,6 +341,9 @@ public class SampleUtils implements AutoCloseable {
     @Override
     public void close() throws Exception {
         // FileUtils.deleteDirectory(tempDir.toFile());
+        if (serverLevel != null) {
+            serverLevel.close();
+        }
         if (minecraftServer instanceof DummyMinecraftServer) {
             WorldPreview.get().loaderSpecificTeardown(minecraftServer);
         }

@@ -215,7 +215,7 @@ public class WorkManager {
     public void queueRange(BlockPos topLeftBlock, BlockPos bottomRightBlock) {
         final ChunkPos topLeft = new ChunkPos(topLeftBlock);
         final ChunkPos bottomRight = new ChunkPos(bottomRightBlock);
-        if (executorService == null ||
+        if (executorService == null || sampleUtils == null ||
                 (
                         topLeft.equals(lastQueuedTopLeft)
                         && bottomRight.equals(lastQueuedBotRight)
