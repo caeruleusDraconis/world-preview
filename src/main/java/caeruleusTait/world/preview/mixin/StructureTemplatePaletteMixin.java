@@ -15,7 +15,7 @@ public abstract class StructureTemplatePaletteMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void threadSafeCache(List<StructureTemplate.StructureBlockInfo> list, CallbackInfo ci) {
-        if (WorldPreview.get().workManager().isSetup()) {
+        if (WorldPreview.get() != null && WorldPreview.get().workManager().isSetup()) {
             ((StructureTemplatePaletteAccessor) this).setCache(new ConcurrentHashMap<>());
         }
     }
