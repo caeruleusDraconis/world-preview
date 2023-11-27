@@ -48,6 +48,9 @@ public class WorldPreviewComponents {
     public static final Component SETTINGS_GENERAL_CONTROLS_TOOLTIP = Component.translatable("world_preview.settings.general.controls.tooltip");
     public static final Component SETTINGS_GENERAL_FRAMETIME = Component.translatable("world_preview.settings.general.frametime");
     public static final Component SETTINGS_GENERAL_FRAMETIME_TOOLTIP = Component.translatable("world_preview.settings.general.frametime.tooltip");
+    public static final Component SETTINGS_GENERAL_SHOW_IN_MENU = Component.translatable("world_preview.settings.general.showinmenu");
+    public static final Component SETTINGS_GENERAL_SHOW_IN_MENU_TOOLTIP = Component.translatable("world_preview.settings.general.showinmenu.tooltip");
+
 
     // - Sampling settings
     public static final Component SETTINGS_SAMPLE_TITLE = Component.translatable("world_preview.settings.sample.title");

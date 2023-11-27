@@ -44,6 +44,7 @@ public class GeneralTab extends GridLayoutTab {
         WGCheckbox cbInt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_INTERSECT, x -> cfg.sampleIntersections = x.selected(), cfg.sampleIntersections);
         WGCheckbox cbCtrl = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_CONTROLS, x -> cfg.showControls = x.selected(), cfg.showControls);
         WGCheckbox cbFt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_FRAMETIME, x -> cfg.showFrameTime = x.selected(), cfg.showFrameTime);
+        WGCheckbox cbPause = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_SHOW_IN_MENU, x -> cfg.showInPauseMenu = x.selected(), cfg.showInPauseMenu);
 
         threadsSlider.setTooltip(Tooltip.create(SETTINGS_GENERAL_THREADS_TOOLTIP));
         cbFc.setTooltip(Tooltip.create(SETTINGS_GENERAL_FC_TOOLTIP));
@@ -53,6 +54,7 @@ public class GeneralTab extends GridLayoutTab {
         cbInt.setTooltip(Tooltip.create(SETTINGS_GENERAL_INTERSECT_TOOLTIP));
         cbCtrl.setTooltip(Tooltip.create(SETTINGS_GENERAL_CONTROLS_TOOLTIP));
         cbFt.setTooltip(Tooltip.create(SETTINGS_GENERAL_FRAMETIME_TOOLTIP));
+        cbPause.setTooltip(Tooltip.create(SETTINGS_GENERAL_SHOW_IN_MENU_TOOLTIP));
 
         GridLayout.RowHelper rowHelper = layout.rowSpacing(4).createRowHelper(2);
         rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, LINE_WIDTH, LINE_HEIGHT, WGLabel.TextAlignment.CENTER, SETTINGS_GENERAL_HEAD, 0xFFFFFF), 2);
@@ -62,9 +64,10 @@ public class GeneralTab extends GridLayoutTab {
         rowHelper.addChild(cbStruct, 1);
         rowHelper.addChild(cbHm, 1);
         rowHelper.addChild(cbInt, 1);
-        rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, 200, LINE_HEIGHT / 3, WGLabel.TextAlignment.CENTER, Component.literal(""), 0xFFFFFF), 2);
+        rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, 200, LINE_HEIGHT / 10, WGLabel.TextAlignment.CENTER, Component.literal(""), 0xFFFFFF), 2);
         rowHelper.addChild(cbCtrl);
         rowHelper.addChild(cbFt);
+        rowHelper.addChild(cbPause);
     }
 
     public static class ThreadCount implements SelectionSlider.SelectionValues {

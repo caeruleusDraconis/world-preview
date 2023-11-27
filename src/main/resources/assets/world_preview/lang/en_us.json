@@ -45,6 +45,8 @@
   "world_preview.settings.general.controls.tooltip": "Show the controls in the preview tooltip",
   "world_preview.settings.general.frametime": "Show frame time",
   "world_preview.settings.general.frametime.tooltip": "Show the frame time of the preview render",
+  "world_preview.settings.general.showinmenu": "Show button in menu",
+  "world_preview.settings.general.showinmenu.tooltip": "Show a button for opening the preview in the pause menu\n\n(Singleplayer only)",
   "world_preview.settings.sample.title": "Resolution",
   "world_preview.settings.sample.head": "Advanced biome sampling settings",
   "world_preview.settings.sample.numChunk.title1": "The size of a chunk in the preview.",

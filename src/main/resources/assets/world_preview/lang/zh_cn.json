@@ -44,6 +44,8 @@
   "world_preview.settings.general.controls.tooltip": "在预览工具提示中显示控件",
   "world_preview.settings.general.frametime": "显示帧时间",
   "world_preview.settings.general.frametime.tooltip": "显示预览渲染的帧时间",
+  "world_preview.settings.general.showinmenu": "Show button in menu",
+  "world_preview.settings.general.showinmenu.tooltip": "Show a button for opening the preview in the pause menu\n\n(Singleplayer only)",
   "world_preview.settings.sample.title": "分辨率",
   "world_preview.settings.sample.head": "高级生物群系采样设置",
   "world_preview.settings.sample.numChunk.title1": "预览中区块的大小。",
