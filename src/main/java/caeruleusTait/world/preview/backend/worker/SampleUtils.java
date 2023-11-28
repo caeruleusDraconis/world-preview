@@ -173,11 +173,6 @@ public class SampleUtils implements AutoCloseable {
         this.registryAccess = layeredRegistryAccess.compositeAccess();
         this.structureRegistry = this.registryAccess.registryOrThrow(Registries.STRUCTURE);
         this.previewLevel = new PreviewLevel(this.registryAccess, this.levelHeightAccessor);
-        this.chunkGeneratorStructureState = this.chunkGenerator.createState(
-                this.registryAccess.lookupOrThrow(Registries.STRUCTURE_SET),
-                this.randomState,
-                worldOptions.seed()
-        );
 
         PackRepository packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
         resourceManager = (new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, false)).createResourceManager().getSecond();
@@ -187,20 +182,6 @@ public class SampleUtils implements AutoCloseable {
 
         ResourceKey<LevelStem> levelStemResourceKey = this.registryAccess.registryOrThrow(LEVEL_STEM).getResourceKey(levelStem).orElseThrow();
         ResourceKey<Level> levelResourceKey = Registries.levelStemToLevel(levelStemResourceKey);
-        this.structureCheck = new StructureCheck(
-                null, // Should never be required because `tryLoadFromStorage` must not be called
-                this.registryAccess,
-                this.structureTemplateManager,
-                levelResourceKey,
-                this.chunkGenerator,
-                this.randomState,
-                this.levelHeightAccessor,
-                chunkGenerator.getBiomeSource(),
-                worldOptions.seed(),
-                dataFixer
-        );
-
-        this.structureManager = new StructureManager(this.previewLevel, worldOptions, this.structureCheck);
 
         // Some mods listen on the <init> of MinecraftServer
         LevelSettings levelSettings = new LevelSettings("temp", GameType.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(), worldDataConfiguration);
@@ -244,6 +225,26 @@ public class SampleUtils implements AutoCloseable {
 
         // All this stuff, just so we can give Forge a fake minecraft server...
         WorldPreview.get().loaderSpecificSetup(minecraftServer);
+
+        // This needs to happen *after* creating the dummy Minecraft server
+        this.structureCheck = new StructureCheck(
+                null, // Should never be required because `tryLoadFromStorage` must not be called
+                this.registryAccess,
+                this.structureTemplateManager,
+                levelResourceKey,
+                this.chunkGenerator,
+                this.randomState,
+                this.levelHeightAccessor,
+                chunkGenerator.getBiomeSource(),
+                worldOptions.seed(),
+                dataFixer
+        );
+        this.structureManager = new StructureManager(this.previewLevel, worldOptions, this.structureCheck);
+        this.chunkGeneratorStructureState = this.chunkGenerator.createState(
+                this.registryAccess.lookupOrThrow(Registries.STRUCTURE_SET),
+                this.randomState,
+                worldOptions.seed()
+        );
 
         // Initialize early
         chunkGeneratorStructureState.ensureStructuresGenerated();
