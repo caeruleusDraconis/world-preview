@@ -27,6 +27,8 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.MapColor;
@@ -36,6 +38,8 @@ import org.joml.Matrix4f;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.MSG_ERROR_SETUP_FAILED;
 
 public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     private final Minecraft minecraft;
@@ -173,7 +177,22 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         final Instant renderStart = Instant.now();
         queueGeneration();
         synchronized (dataProvider) {
-            if (dataProvider.isUpdating()) {
+            if (dataProvider.setupFailed()) {
+                previewImg.fillRect(0, 0, texWidth, texHeight, 0xFF000000);
+                previewTexture.upload();
+                WorldPreviewClient.renderTexture(previewTexture, xMin, yMin, xMax, yMax);
+
+                final List<MutableComponent> lines = MSG_ERROR_SETUP_FAILED.getString().lines().map(Component::literal).toList();
+
+                final int centerX = getX() + (width / 2);
+                final int centerY = getY() + (height / 2) - ((lines.size() / 2) * (minecraft.font.lineHeight + 4));
+
+                for (int i = 0; i < lines.size(); ++i) {
+                    final Component line = lines.get(i);
+                    final int offsetY = i * (minecraft.font.lineHeight + 4);
+                    guiGraphics.drawCenteredString(minecraft.font, line, centerX, centerY + offsetY, 0xFFFFFF);
+                }
+            } else if (dataProvider.isUpdating()) {
                 previewImg.fillRect(0, 0, texWidth, texHeight, 0xFF000000);
                 previewTexture.upload();
                 WorldPreviewClient.renderTexture(previewTexture, xMin, yMin, xMax, yMax);

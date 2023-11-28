@@ -109,6 +109,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
     private boolean inhibitUpdates = true;
     private boolean isUpdating = false;
+    private boolean setupFailed = false;
     private final Executor reloadExecutor = Executors.newSingleThreadExecutor();
     private final AtomicInteger reloadRevision = new AtomicInteger(0);
 
@@ -335,30 +336,29 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                         if (reloadRevision.get() > revision) {
                             return null;
                         }
-                        try {
-                            return dataProvider.previewWorldCreationContext();
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                            throw e;
-                        }
+                        return dataProvider.previewWorldCreationContext();
                     }, reloadExecutor)
                     .thenAcceptAsync(x -> {
                         // Check if we are the latest update
                         if (reloadRevision.get() > revision) {
                             return;
                         }
-                        try {
-                            updateSettings_real(x);
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                            throw e;
-                        }
+                        updateSettings_real(x);
                         synchronized (reloadRevision) {
                             if (reloadRevision.get() <= revision) {
                                 isUpdating = false;
                             }
                         }
-                    }, minecraft);
+                    }, minecraft)
+                    .handle((r, e) -> {
+                        if (e == null) {
+                            setupFailed = false;
+                        } else {
+                            e.printStackTrace();
+                            setupFailed = true;
+                        }
+                        return null;
+                    });
         } finally {
             inhibitUpdates = false;
         }
@@ -846,6 +846,11 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     @Override
     public boolean isUpdating() {
         return isUpdating;
+    }
+
+    @Override
+    public boolean setupFailed() {
+        return setupFailed;
     }
 
     public ToggleButton toggleCaves() {

@@ -117,9 +117,6 @@ public class WorkManager {
             );
         }
 
-        executorService = Executors.newFixedThreadPool(config.numThreads());
-        queueChunksService = Executors.newSingleThreadExecutor();
-
         LevelHeightAccessor levelHeightAccessor = LevelHeightAccessor.create(dimensionType.minY(), dimensionType.height());
         try {
             if (server == null) {
@@ -149,6 +146,11 @@ public class WorkManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        // Only create the executors at the end to ensure that there are no
+        // null pointer exceptions
+        executorService = Executors.newFixedThreadPool(config.numThreads());
+        queueChunksService = Executors.newSingleThreadExecutor();
     }
 
     private void shutdownExecutors() {
