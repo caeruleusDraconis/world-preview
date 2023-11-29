@@ -18,15 +18,18 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.*;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.RandomSequences;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.*;
@@ -37,6 +40,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import net.minecraft.world.level.storage.DerivedLevelData;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -53,6 +57,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
@@ -101,11 +106,14 @@ public class SampleUtils implements AutoCloseable {
         this.structureTemplateManager = minecraftServer.getStructureManager();
         this.previewLevel = new PreviewLevel(this.registryAccess, this.levelHeightAccessor);
 
-        ResourceKey<LevelStem> levelStemResourceKey = this.registryAccess.registryOrThrow(LEVEL_STEM).getResourceKey(levelStem).orElseThrow();
+        ResourceKey<LevelStem> levelStemResourceKey = this.registryAccess.registryOrThrow(LEVEL_STEM)
+                .getResourceKey(levelStem)
+                .orElseThrow();
         ResourceKey<Level> levelResourceKey = Registries.levelStemToLevel(levelStemResourceKey);
 
         this.structureCheck = new StructureCheck(
-                null, // Should never be required because `tryLoadFromStorage` must not be called
+                null,
+                // Should never be required because `tryLoadFromStorage` must not be called
                 this.registryAccess,
                 this.structureTemplateManager,
                 levelResourceKey,
@@ -149,7 +157,12 @@ public class SampleUtils implements AutoCloseable {
         }
 
         this.dataFixer = DataFixers.getDataFixer();
-        LevelStorageSource levelStorageSource = new LevelStorageSource(tempDir, tempDir.resolve("backups"), new DirectoryValidator(new PathAllowList(List.of())), dataFixer);
+        LevelStorageSource levelStorageSource = new LevelStorageSource(
+                tempDir,
+                tempDir.resolve("backups"),
+                new DirectoryValidator(new PathAllowList(List.of())),
+                dataFixer
+        );
         this.levelStorageAccess = levelStorageSource.createAccess("world_preview");
         this.levelHeightAccessor = levelHeightAccessor;
 
@@ -175,12 +188,26 @@ public class SampleUtils implements AutoCloseable {
         this.previewLevel = new PreviewLevel(this.registryAccess, this.levelHeightAccessor);
 
         PackRepository packRepository = ServerPacksSource.createPackRepository(levelStorageAccess);
-        resourceManager = (new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, false)).createResourceManager().getSecond();
+        resourceManager = (new WorldLoader.PackConfig(
+                packRepository,
+                worldDataConfiguration,
+                false,
+                false
+        )).createResourceManager().getSecond();
 
-        HolderGetter<Block> holderGetter = this.registryAccess.registryOrThrow(Registries.BLOCK).asLookup().filterFeatures(worldDataConfiguration.enabledFeatures());
-        this.structureTemplateManager = new StructureTemplateManager(resourceManager, levelStorageAccess, dataFixer, holderGetter);
+        HolderGetter<Block> holderGetter = this.registryAccess.registryOrThrow(Registries.BLOCK)
+                .asLookup()
+                .filterFeatures(worldDataConfiguration.enabledFeatures());
+        this.structureTemplateManager = new StructureTemplateManager(
+                resourceManager,
+                levelStorageAccess,
+                dataFixer,
+                holderGetter
+        );
 
-        ResourceKey<LevelStem> levelStemResourceKey = this.registryAccess.registryOrThrow(LEVEL_STEM).getResourceKey(levelStem).orElseThrow();
+        ResourceKey<LevelStem> levelStemResourceKey = this.registryAccess.registryOrThrow(LEVEL_STEM)
+                .getResourceKey(levelStem)
+                .orElseThrow();
         ResourceKey<Level> levelResourceKey = Registries.levelStemToLevel(levelStemResourceKey);
 
         // Some mods listen on the <init> of MinecraftServer
@@ -203,7 +230,10 @@ public class SampleUtils implements AutoCloseable {
                     }
 
                     @Override
-                    public void onStatusChange(ChunkPos chunkPosition, @Nullable ChunkStatus newStatus) {
+                    public void onStatusChange(
+                            ChunkPos chunkPosition,
+                            @Nullable ChunkStatus newStatus
+                    ) {
                     }
 
                     @Override
@@ -225,6 +255,40 @@ public class SampleUtils implements AutoCloseable {
 
         // All this stuff, just so we can give Forge a fake minecraft server...
         WorldPreview.get().loaderSpecificSetup(minecraftServer);
+
+        // Use this (or add an option) to do things "properly"
+        // ((DummyMinecraftServer) minecraftServer).createLevels();
+
+        // Now "create" a world, to trigger mixins hooking the ServerLevel constructor
+        new ServerLevel(
+                minecraftServer,
+                Executors.newSingleThreadExecutor(),
+                levelStorageAccess,
+                new DerivedLevelData(
+                        worldStem.worldData(),
+                        worldStem.worldData().overworldData()
+                ),
+                levelResourceKey,
+                levelStem,
+                new ChunkProgressListener() {
+                    @Override
+                    public void updateSpawnPos(ChunkPos center) {}
+
+                    @Override
+                    public void onStatusChange(ChunkPos chunkPosition, @Nullable ChunkStatus newStatus) {}
+
+                    @Override
+                    public void start() {}
+
+                    @Override
+                    public void stop() {}
+                },
+                false, // debug
+                BiomeManager.obfuscateSeed(worldOptions.seed()),
+                List.of(),
+                false, // tickTime
+                null
+        );
 
         // This needs to happen *after* creating the dummy Minecraft server
         this.structureCheck = new StructureCheck(
