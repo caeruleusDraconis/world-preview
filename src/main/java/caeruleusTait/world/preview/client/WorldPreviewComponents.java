@@ -23,6 +23,9 @@ public class WorldPreviewComponents {
     public static final Component BTN_TOGGLE_INTERSECT = Component.translatable("world_preview.preview.btn-toggle-intersect");
     public static final Component BTN_TOGGLE_INTERSECT_DISABLED = Component.translatable("world_preview.preview.btn-toggle-intersect.disabled");
 
+    // Error message on setup
+    public static final Component MSG_ERROR_SETUP_FAILED = Component.translatable("world_preview.preview.error.setup-failed");
+
     // Settings
     public static final Component SETTINGS_TITLE = Component.translatable("world_preview.settings.title");
 

@@ -34,6 +34,8 @@ public interface PreviewDisplayDataProvider {
 
     boolean isUpdating();
 
+    boolean setupFailed();
+
     interface StructureRenderInfo {
         boolean show();
     }
