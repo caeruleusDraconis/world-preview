@@ -14,6 +14,7 @@
     "StructureTemplatePaletteMixin"
   ],
   "client": [
+    "client.CheckboxAccessor",
     "client.CreateWorldScreenAccessor",
     "client.CreateWorldScreenMixin",
     "client.PauseScreenMixin",

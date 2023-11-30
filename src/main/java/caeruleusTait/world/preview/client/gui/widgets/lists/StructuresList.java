@@ -2,6 +2,7 @@ package caeruleusTait.world.preview.client.gui.widgets.lists;
 
 import caeruleusTait.world.preview.client.WorldPreviewClient;
 import caeruleusTait.world.preview.client.gui.widgets.ToggleButton;
+import caeruleusTait.world.preview.client.gui.widgets.WGTooltip;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -88,7 +89,7 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
             }
 
             String tag = "§5§o" + resourceLocation.getNamespace() + "§r\n§9" + resourceLocation.getPath() + "§r";
-            this.tooltip = Tooltip.create(Component.literal(this.name + "\n\n" + tag));
+            this.tooltip = new WGTooltip(Component.literal(this.name + "\n\n" + tag));
         }
 
         public void reset() {

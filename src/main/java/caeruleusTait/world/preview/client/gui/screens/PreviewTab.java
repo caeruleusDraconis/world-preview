@@ -47,7 +47,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
 
     public PreviewTab(CreateWorldScreen screen) {
         createWorldScreen = screen;
-        uiState = ((CreateWorldScreenAccessor) screen).getUiState();
+        uiState = screen.getUiState();
         previewContainer = new PreviewContainer(screen, this);
     }
 

@@ -5,7 +5,6 @@ import caeruleusTait.world.preview.WorldPreviewConfig;
 import caeruleusTait.world.preview.backend.color.ColorMap;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.client.WorldPreviewClient;
-import caeruleusTait.world.preview.client.gui.widgets.WGCheckbox;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
 import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BaseObjectSelectionList;
@@ -14,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.tabs.Tab;
@@ -49,7 +49,7 @@ public class HeightmapTab implements Tab {
     private final WGLabel minYLabel;
     private final WGLabel maxYLabel;
 
-    private final WGCheckbox visualYRange;
+    private final Checkbox visualYRange;
 
     private final WGLabel colormapHead;
     private final ColormapList colormapList;
@@ -89,8 +89,11 @@ public class HeightmapTab implements Tab {
         toRender.add(minYLabel);
         toRender.add(maxYLabel);
 
-        visualYRange = new WGCheckbox(0, 0, 100, LINE_HEIGHT, SETTINGS_HEIGHTMAP_VISUAL, x -> cfg.onlySampleInVisualRange = x.selected(), cfg.onlySampleInVisualRange);
-        visualYRange.setTooltip(Tooltip.create(SETTINGS_HEIGHTMAP_VISUAL_TOOLTIP));
+        visualYRange = Checkbox.builder(SETTINGS_HEIGHTMAP_VISUAL, minecraft.font)
+                .selected(cfg.onlySampleInVisualRange)
+                .onValueChange((box, val) -> cfg.onlySampleInVisualRange = val)
+                .tooltip(Tooltip.create(SETTINGS_HEIGHTMAP_VISUAL_TOOLTIP))
+                .build();
         toRender.add(visualYRange);
 
         heightPresetList = new HeightPresetList(minecraft, 100, 100, 0, 0);

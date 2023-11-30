@@ -124,12 +124,12 @@ public class AbstractSelectionListHolder<E extends BaseObjectSelectionList.Entry
     @Override
     public void setX(int x) {
         super.setX(x);
-        theList.setLeftPos(x);
+        theList.setX(x);
     }
 
     @Override
     public void setY(int y) {
         super.setY(y);
-        theList.setTopPos(y);
+        theList.setY(y);
     }
 }

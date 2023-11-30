@@ -4,16 +4,13 @@ import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.client.gui.screens.PreviewContainer;
 import caeruleusTait.world.preview.client.gui.widgets.ColorChooser;
-import caeruleusTait.world.preview.client.gui.widgets.WGCheckbox;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
 import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
+import caeruleusTait.world.preview.mixin.client.CheckboxAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -51,7 +48,7 @@ public class BiomesTab implements Tab {
 
     private final Button resetBtn;
     private final Button applyBtn;
-    private final WGCheckbox isCaveCB;
+    private final Checkbox isCaveCB;
 
     public BiomesTab(Minecraft _minecraft, PreviewContainer _previewTab) {
         previewContainer = _previewTab;
@@ -98,17 +95,12 @@ public class BiomesTab implements Tab {
         EditBox satBox = new EditBox(font, 0, 0, EDIT_WIDTH, LINE_HEIGHT, COLOR_SAT);
         EditBox valBox = new EditBox(font, 0, 0, EDIT_WIDTH, LINE_HEIGHT, COLOR_VAL);
 
-        isCaveCB = new WGCheckbox(
-                0, 0,
-                FULL_WIDTH, LINE_HEIGHT, COLOR_CAVE,
-                x -> updateStatus(),
-                false
-        );
+        isCaveCB = Checkbox.builder(COLOR_CAVE, minecraft.font).selected(false).onValueChange((x, y) -> updateStatus()).build();
 
         resetBtn = Button
                 .builder(COLOR_RESET, x -> {
                     selectedEntry.reset();
-                    isCaveCB.setSelected(selectedEntry.isCave());
+                    ((CheckboxAccessor) isCaveCB).setSelected(selectedEntry.isCave());
                     colorChooser.updateRGB(selectedEntry.color());
                     statusLabel.setText(selectedEntry.statusComponent());
                 })
@@ -160,7 +152,7 @@ public class BiomesTab implements Tab {
             selectedEntry = biomeEntry;
             if (selectedEntry != null) {
                 colorChooser.updateRGB(selectedEntry.color());
-                isCaveCB.setSelected(selectedEntry.isCave());
+                ((CheckboxAccessor) isCaveCB).setSelected(selectedEntry.isCave());
                 statusLabel.setText(selectedEntry.statusComponent());
             }
         });

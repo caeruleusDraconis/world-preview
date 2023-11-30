@@ -20,7 +20,7 @@ public abstract class WorldTabMixin {
      */
     @Inject(method = "<init>", at = @At("TAIL"))
     private void addSeedUpdateListener(CreateWorldScreen createWorldScreen, CallbackInfo ci) {
-        final WorldCreationUiState uiState = ((CreateWorldScreenAccessor) createWorldScreen).getUiState();
+        final WorldCreationUiState uiState = createWorldScreen.getUiState();
 
         uiState.addListener(worldCreationUiState -> {
             final String currentSeed = worldCreationUiState.getSeed();

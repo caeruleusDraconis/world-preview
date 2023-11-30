@@ -3,9 +3,9 @@ package caeruleusTait.world.preview.client.gui.screens.settings;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.WorldPreviewConfig;
 import caeruleusTait.world.preview.client.gui.widgets.SelectionSlider;
-import caeruleusTait.world.preview.client.gui.widgets.WGCheckbox;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.tabs.GridLayoutTab;
 import net.minecraft.client.gui.layouts.GridLayout;
@@ -37,14 +37,14 @@ public class GeneralTab extends GridLayoutTab {
                 x -> cfg.setNumThreads(x.value)
         );
 
-        WGCheckbox cbBg = new WGCheckbox(0, 0, LINE_WIDTH, LINE_HEIGHT, SETTINGS_GENERAL_BG, x -> cfg.backgroundSampleVertChunk = x.selected(), cfg.backgroundSampleVertChunk);
-        WGCheckbox cbFc = new WGCheckbox(0, 0, LINE_WIDTH, LINE_HEIGHT, SETTINGS_GENERAL_FC, x -> cfg.buildFullVertChunk = x.selected(), cfg.buildFullVertChunk);
-        WGCheckbox cbStruct = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_STRUCT, x -> cfg.sampleStructures = x.selected(), cfg.sampleStructures);
-        WGCheckbox cbHm = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_HEIGHTMAP, x -> cfg.sampleHeightmap = x.selected(), cfg.sampleHeightmap);
-        WGCheckbox cbInt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_INTERSECT, x -> cfg.sampleIntersections = x.selected(), cfg.sampleIntersections);
-        WGCheckbox cbCtrl = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_CONTROLS, x -> cfg.showControls = x.selected(), cfg.showControls);
-        WGCheckbox cbFt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_FRAMETIME, x -> cfg.showFrameTime = x.selected(), cfg.showFrameTime);
-        WGCheckbox cbPause = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_SHOW_IN_MENU, x -> cfg.showInPauseMenu = x.selected(), cfg.showInPauseMenu);
+        Checkbox cbBg     = Checkbox.builder(SETTINGS_GENERAL_BG,           minecraft.font).selected(cfg.backgroundSampleVertChunk).onValueChange((box, val) -> cfg.backgroundSampleVertChunk = val).build();
+        Checkbox cbFc     = Checkbox.builder(SETTINGS_GENERAL_FC,           minecraft.font).selected(cfg.buildFullVertChunk       ).onValueChange((box, val) -> cfg.buildFullVertChunk        = val).build();
+        Checkbox cbStruct = Checkbox.builder(SETTINGS_GENERAL_STRUCT,       minecraft.font).selected(cfg.sampleStructures         ).onValueChange((box, val) -> cfg.sampleStructures          = val).build();
+        Checkbox cbHm     = Checkbox.builder(SETTINGS_GENERAL_HEIGHTMAP,    minecraft.font).selected(cfg.sampleHeightmap          ).onValueChange((box, val) -> cfg.sampleHeightmap           = val).build();
+        Checkbox cbInt    = Checkbox.builder(SETTINGS_GENERAL_INTERSECT,    minecraft.font).selected(cfg.sampleIntersections      ).onValueChange((box, val) -> cfg.sampleIntersections       = val).build();
+        Checkbox cbCtrl   = Checkbox.builder(SETTINGS_GENERAL_CONTROLS,     minecraft.font).selected(cfg.showControls             ).onValueChange((box, val) -> cfg.showControls              = val).build();
+        Checkbox cbFt     = Checkbox.builder(SETTINGS_GENERAL_FRAMETIME,    minecraft.font).selected(cfg.showFrameTime            ).onValueChange((box, val) -> cfg.showFrameTime             = val).build();
+        Checkbox cbPause  = Checkbox.builder(SETTINGS_GENERAL_SHOW_IN_MENU, minecraft.font).selected(cfg.showInPauseMenu          ).onValueChange((box, val) -> cfg.showInPauseMenu           = val).build();
 
         threadsSlider.setTooltip(Tooltip.create(SETTINGS_GENERAL_THREADS_TOOLTIP));
         cbFc.setTooltip(Tooltip.create(SETTINGS_GENERAL_FC_TOOLTIP));
