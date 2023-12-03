@@ -61,6 +61,12 @@ public class InGamePreviewScreen extends Screen implements PreviewContainerDataP
     }
 
     @Override
+    public void onClose() {
+        previewContainer.close();
+        super.onClose();
+    }
+
+    @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
