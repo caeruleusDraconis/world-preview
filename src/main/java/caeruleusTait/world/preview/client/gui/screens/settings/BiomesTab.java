@@ -5,7 +5,6 @@ import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.client.gui.screens.PreviewContainer;
 import caeruleusTait.world.preview.client.gui.widgets.ColorChooser;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
-import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import caeruleusTait.world.preview.mixin.client.CheckboxAccessor;
 import net.minecraft.client.Minecraft;
@@ -39,7 +38,6 @@ public class BiomesTab implements Tab {
     private final Minecraft minecraft;
     private final GridLayout layout = new GridLayout();
     private final BiomesList biomesList;
-    private final AbstractSelectionListHolder<BiomesList.BiomeEntry, BiomesList> biomesListHolder;
     private final CycleButton<BiomeListFilter> filterCycleButton;
     private final List<AbstractWidget> toRender = new ArrayList<>();
     private final ColorChooser colorChooser;
@@ -55,8 +53,7 @@ public class BiomesTab implements Tab {
         minecraft = _minecraft;
         final Font font = minecraft.font;
         biomesList = new BiomesList(previewContainer, minecraft, 100, 100, 0, 0, false);
-        biomesListHolder = new AbstractSelectionListHolder<>(biomesList, 0, 0, 100, 100, SETTINGS_BIOMES_TITLE);
-        toRender.add(biomesListHolder);
+        toRender.add(biomesList);
 
         colorChooser = new ColorChooser(0, 0);
         toRender.add(colorChooser);
@@ -214,8 +211,8 @@ public class BiomesTab implements Tab {
         filterCycleButton.setWidth(leftWidth);
 
         int listTop = top + LINE_HEIGHT + LINE_VSPACE;
-        biomesListHolder.setPosition(left, listTop);
-        biomesListHolder.setSize(leftWidth, bottom - listTop - LINE_VSPACE);
+        biomesList.setPosition(left, listTop);
+        biomesList.setSize(leftWidth, bottom - listTop - LINE_VSPACE);
         biomesList.setRenderBackground(true);
         biomesList.replaceEntries(filterCycleButton.getValue().apply(previewContainer.allBiomes()));
 

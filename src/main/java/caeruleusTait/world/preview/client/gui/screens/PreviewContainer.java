@@ -12,7 +12,7 @@ import caeruleusTait.world.preview.client.gui.PreviewDisplayDataProvider;
 import caeruleusTait.world.preview.client.gui.widgets.OldStyleImageButton;
 import caeruleusTait.world.preview.client.gui.widgets.PreviewDisplay;
 import caeruleusTait.world.preview.client.gui.widgets.ToggleButton;
-import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
+import caeruleusTait.world.preview.client.gui.widgets.lists.BaseObjectSelectionList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.SeedsList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.StructuresList;
@@ -100,9 +100,6 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     private final BiomesList biomesList;
     private final StructuresList structuresList;
     private final SeedsList seedsList;
-    private final AbstractSelectionListHolder<BiomesList.BiomeEntry, BiomesList> biomesListHolder;
-    private final AbstractSelectionListHolder<StructuresList.StructureEntry, StructuresList> structuresListHolder;
-    private final AbstractSelectionListHolder<SeedsList.SeedEntry, SeedsList> seedsListHolder;
     private BiomesList.BiomeEntry[] allBiomes;
     private StructuresList.StructureEntry[] allStructures;
     private NativeImage[] allStructureIcons;
@@ -202,20 +199,14 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         toRender.add(switchSeeds);
 
         biomesList = new BiomesList(this, minecraft, 200, 300, 4, 100, true);
-        biomesListHolder = new AbstractSelectionListHolder<>(biomesList, 0, 0, screen.width, screen.height, TITLE);
-        biomesListHolder.visible = true;
-        toRender.add(biomesListHolder);
+        toRender.add(biomesList);
 
         structuresList = new StructuresList(minecraft, 200, 300, 4, 100);
-        structuresListHolder = new AbstractSelectionListHolder<>(structuresList, 0, 0, screen.width, screen.height, TITLE);
-        structuresListHolder.visible = false;
-        toRender.add(structuresListHolder);
+        toRender.add(structuresList);
 
         seedsList = new SeedsList(minecraft, this);
-        seedsListHolder = new AbstractSelectionListHolder<>(seedsList, 0, 0, screen.width, screen.height, TITLE);
-        seedsListHolder.visible = false;
         updateSeedListWidget();
-        toRender.add(seedsListHolder);
+        toRender.add(seedsList);
 
         previewDisplay = new PreviewDisplay(minecraft, this, TITLE);
         toRender.add(previewDisplay);
@@ -638,10 +629,22 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         onTabButtonChange(switchBiomes, DisplayType.BIOMES);
     }
 
+    // TODO: Check if this can be removed in a future MC version
+    private void moveList(BaseObjectSelectionList<?> theList) {
+        if ((theList.active && theList.getX() > 0) || (!theList.active && theList.getX() < 0)) {
+            return;
+        }
+        final int newX = theList.getX() + (theList.active ? 4096 : -4096);
+        theList.setPosition(newX, theList.getY());
+    }
+
     private void onTabButtonChange(Button btn, DisplayType type) {
-        biomesListHolder.visible = false;
-        structuresListHolder.visible = false;
-        seedsListHolder.visible = false;
+        biomesList.visible = false;
+        biomesList.active = false;
+        structuresList.visible = false;
+        structuresList.active = false;
+        seedsList.visible = false;
+        seedsList.active = false;
 
         switchBiomes.active = true;
         switchStructures.active = true;
@@ -658,13 +661,24 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
         btn.active = false;
         switch (type) {
-            case BIOMES -> biomesListHolder.visible = true;
+            case BIOMES -> {
+                biomesList.visible = true;
+                biomesList.active = true;
+            }
             case STRUCTURES -> {
                 resetDefaultStructureVisibility.visible = true;
-                structuresListHolder.visible = true;
+                structuresList.visible = true;
+                structuresList.active = true;
             }
-            case SEEDS -> seedsListHolder.visible = true;
+            case SEEDS -> {
+                seedsList.visible = true;
+                seedsList.active = true;
+            }
         }
+
+        moveList(biomesList);
+        moveList(structuresList);
+        moveList(seedsList);
     }
 
     /**
@@ -738,12 +752,12 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         //  - new row
         top += LINE_HEIGHT + LINE_VSPACE;
 
-        biomesListHolder.setPosition(left, top);
-        biomesListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
+        biomesList.setPosition(left, top);
+        biomesList.setSize(leftWidth, bottom - top - LINE_VSPACE);
         biomesList.setRenderBackground(true);
 
-        seedsListHolder.setPosition(left, top);
-        seedsListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
+        seedsList.setPosition(left, top);
+        seedsList.setSize(leftWidth, bottom - top - LINE_VSPACE);
         seedsList.setRenderBackground(true);
 
         // BOTTOM
@@ -753,9 +767,13 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         resetDefaultStructureVisibility.setPosition(left, bottom);
         resetDefaultStructureVisibility.setWidth(leftWidth);
 
-        structuresListHolder.setPosition(left, top);
-        structuresListHolder.setSize(leftWidth, bottom - top - LINE_VSPACE);
+        structuresList.setPosition(left, top);
+        structuresList.setSize(leftWidth, bottom - top - LINE_VSPACE);
         structuresList.setRenderBackground(true);
+
+        moveList(biomesList);
+        moveList(structuresList);
+        moveList(seedsList);
     }
 
     public void close() {

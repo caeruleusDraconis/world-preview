@@ -6,7 +6,6 @@ import caeruleusTait.world.preview.backend.color.ColorMap;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.client.WorldPreviewClient;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
-import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BaseObjectSelectionList;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
@@ -41,7 +40,6 @@ public class HeightmapTab implements Tab {
     private final WGLabel disabledWarning;
     private final WGLabel presetsHead;
     private final HeightPresetList heightPresetList;
-    private final AbstractSelectionListHolder<HeightPresetList.HeightPresetEntry, HeightPresetList> heightPresetListHolder;
 
     private final EditBox minYBox;
     private final EditBox maxYBox;
@@ -53,7 +51,6 @@ public class HeightmapTab implements Tab {
 
     private final WGLabel colormapHead;
     private final ColormapList colormapList;
-    private final AbstractSelectionListHolder<ColormapList.ColormapEntry, ColormapList> colormapListHolder;
 
     private final List<AbstractWidget> toRender = new ArrayList<>();
 
@@ -109,8 +106,7 @@ public class HeightmapTab implements Tab {
                         .toList()
         );
 
-        heightPresetListHolder = new AbstractSelectionListHolder<>(heightPresetList, 0, 0, 100, 100, Component.empty());
-        toRender.add(heightPresetListHolder);
+        toRender.add(heightPresetList);
 
 
         colormapList = new ColormapList(minecraft, 100, 100, 0, 0);
@@ -121,8 +117,7 @@ public class HeightmapTab implements Tab {
                 .collect(Collectors.toMap(x -> x.colorMap.key().toString(), x -> x));
         colormapList.replaceEntries(colormaps.values().stream().sorted(Comparator.comparing(x -> x.name)).toList());
         colormapList.setSelected(colormaps.get(cfg.colorMap));
-        colormapListHolder = new AbstractSelectionListHolder<>(colormapList, 0, 0, 100, 100, Component.empty());
-        toRender.add(colormapListHolder);
+        toRender.add(colormapList);
     }
 
     private static boolean isInteger(String s) {
@@ -198,8 +193,8 @@ public class HeightmapTab implements Tab {
 
         //      New Line
         topL += (LINE_HEIGHT / 2) + LINE_VSPACE;
-        heightPresetListHolder.setPosition(leftL, topL);
-        heightPresetListHolder.setSize(secWidth, bottomL - topL - LINE_VSPACE);
+        heightPresetList.setPosition(leftL, topL);
+        heightPresetList.setSize(secWidth, bottomL - topL - LINE_VSPACE);
         heightPresetList.setRenderBackground(true);
 
         // RIGHT COLUMN
@@ -209,8 +204,8 @@ public class HeightmapTab implements Tab {
 
         //      New Line
         topR += (LINE_HEIGHT / 2) + LINE_VSPACE;
-        colormapListHolder.setPosition(leftR, topR);
-        colormapListHolder.setSize(secWidth, bottomR - topR + LINE_HEIGHT);
+        colormapList.setPosition(leftR, topR);
+        colormapList.setSize(secWidth, bottomR - topR + LINE_HEIGHT);
         colormapList.setRenderBackground(true);
     }
 

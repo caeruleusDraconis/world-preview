@@ -3,7 +3,6 @@ package caeruleusTait.world.preview.client.gui.screens.settings;
 import caeruleusTait.world.preview.RenderSettings;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
-import caeruleusTait.world.preview.client.gui.widgets.lists.AbstractSelectionListHolder;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BaseObjectSelectionList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -30,7 +29,6 @@ public class DimensionsTab implements Tab {
 
     private final WGLabel headLabel;
     private final DimensionList dimensionList;
-    private final AbstractSelectionListHolder<DimensionList.DimensionEntry, DimensionList> dimensionListHolder;
 
     public DimensionsTab(Minecraft minecraft, List<ResourceLocation> levelStemKeys) {
         this.minecraft = minecraft;
@@ -40,7 +38,6 @@ public class DimensionsTab implements Tab {
         dimensionList = new DimensionList(minecraft, 256, 100, 0, 0);
         dimensionList.replaceEntries(levelStemKeys.stream().map(dimensionList::entryFactory).toList());
         dimensionList.select(renderSettings.dimension);
-        dimensionListHolder = new AbstractSelectionListHolder<>(dimensionList, 0, 0, 256, 100, SETTINGS_DIM_TITLE);
     }
 
     @Override
@@ -51,7 +48,7 @@ public class DimensionsTab implements Tab {
     @Override
     public void visitChildren(Consumer<AbstractWidget> consumer) {
         consumer.accept(headLabel);
-        consumer.accept(dimensionListHolder);
+        consumer.accept(dimensionList);
     }
 
     @Override
@@ -66,8 +63,8 @@ public class DimensionsTab implements Tab {
         headLabel.setPosition(left, top);
 
         top += LINE_HEIGHT + LINE_VSPACE;
-        dimensionListHolder.setPosition(left, top);
-        dimensionListHolder.setSize(width, bottom - top);
+        dimensionList.setPosition(left, top);
+        dimensionList.setSize(width, bottom - top);
         dimensionList.setRenderBackground(true);
     }
 
