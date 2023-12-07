@@ -102,6 +102,14 @@ This table shows the current support status for the Minecraft version.
 
 This mod should be compatible with most mods (including those adding new biomes and dimensions).
 
+### TerraFirmaCraft (TFC)
+
+World Preview **is** compatible with TFC, however, there is a known issue:
+
+The Y intersections view will always be a white screen for all Y levels with TFC, because the `TFCChunkGenerator` has a dummy implementation for the [`getBaseColumn`](https://github.com/TerraFirmaCraft/TerraFirmaCraft/blob/v3.1.2-beta/src/main/java/net/dries007/tfc/world/TFCChunkGenerator.java#L643-L646) method.
+
+To clarify: This doesn't mean that TFC is broken / does something wrong (it clearly works on its own and does its job).
+It just means that TFC does not provide the specific information World Preview needs in this case.
 
 ## Adding support for new biomes and structures
 
