@@ -37,10 +37,8 @@ public abstract class ChunkGeneratorStructureStateMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void threadSafeFixup(RandomState randomState, BiomeSource biomeSource, long l, long m, List list, CallbackInfo ci) {
-        if (WorldPreview.get() != null && WorldPreview.get().workManager().isSetup()) {
-            placementsForStructure = Object2ObjectMaps.synchronize((Object2ObjectMap<Structure, List<StructurePlacement>>) placementsForStructure);
-            ringPositions = Object2ObjectMaps.synchronize((Object2ObjectMap<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>>) ringPositions);
-        }
+        placementsForStructure = Object2ObjectMaps.synchronize((Object2ObjectMap<Structure, List<StructurePlacement>>) placementsForStructure);
+        ringPositions = Object2ObjectMaps.synchronize((Object2ObjectMap<ConcentricRingsStructurePlacement, CompletableFuture<List<ChunkPos>>>) ringPositions);
     }
 
 }
