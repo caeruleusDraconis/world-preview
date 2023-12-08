@@ -45,6 +45,7 @@ public class GeneralTab extends GridLayoutTab {
         WGCheckbox cbCtrl = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_CONTROLS, x -> cfg.showControls = x.selected(), cfg.showControls);
         WGCheckbox cbFt = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_FRAMETIME, x -> cfg.showFrameTime = x.selected(), cfg.showFrameTime);
         WGCheckbox cbPause = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_SHOW_IN_MENU, x -> cfg.showInPauseMenu = x.selected(), cfg.showInPauseMenu);
+        WGCheckbox cbPlayer = new WGCheckbox(0, 0, LINE_WIDTH / 2 - 4, LINE_HEIGHT, SETTINGS_GENERAL_SHOW_PLAYER, x -> cfg.showPlayer = x.selected(), cfg.showPlayer);
 
         threadsSlider.setTooltip(Tooltip.create(SETTINGS_GENERAL_THREADS_TOOLTIP));
         cbFc.setTooltip(Tooltip.create(SETTINGS_GENERAL_FC_TOOLTIP));
@@ -55,6 +56,7 @@ public class GeneralTab extends GridLayoutTab {
         cbCtrl.setTooltip(Tooltip.create(SETTINGS_GENERAL_CONTROLS_TOOLTIP));
         cbFt.setTooltip(Tooltip.create(SETTINGS_GENERAL_FRAMETIME_TOOLTIP));
         cbPause.setTooltip(Tooltip.create(SETTINGS_GENERAL_SHOW_IN_MENU_TOOLTIP));
+        cbPlayer.setTooltip(Tooltip.create(SETTINGS_GENERAL_SHOW_PLAYER_TOOLTIP));
 
         GridLayout.RowHelper rowHelper = layout.rowSpacing(4).createRowHelper(2);
         rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, LINE_WIDTH, LINE_HEIGHT, WGLabel.TextAlignment.CENTER, SETTINGS_GENERAL_HEAD, 0xFFFFFF), 2);
@@ -68,6 +70,7 @@ public class GeneralTab extends GridLayoutTab {
         rowHelper.addChild(cbCtrl);
         rowHelper.addChild(cbFt);
         rowHelper.addChild(cbPause);
+        rowHelper.addChild(cbPlayer);
     }
 
     public static class ThreadCount implements SelectionSlider.SelectionValues {

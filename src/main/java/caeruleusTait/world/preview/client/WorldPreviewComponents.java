@@ -50,6 +50,8 @@ public class WorldPreviewComponents {
     public static final Component SETTINGS_GENERAL_FRAMETIME_TOOLTIP = Component.translatable("world_preview.settings.general.frametime.tooltip");
     public static final Component SETTINGS_GENERAL_SHOW_IN_MENU = Component.translatable("world_preview.settings.general.showinmenu");
     public static final Component SETTINGS_GENERAL_SHOW_IN_MENU_TOOLTIP = Component.translatable("world_preview.settings.general.showinmenu.tooltip");
+    public static final Component SETTINGS_GENERAL_SHOW_PLAYER = Component.translatable("world_preview.settings.general.showplayer");
+    public static final Component SETTINGS_GENERAL_SHOW_PLAYER_TOOLTIP = Component.translatable("world_preview.settings.general.showplayer.tooltip");
 
 
     // - Sampling settings
