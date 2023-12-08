@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.*;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
@@ -61,6 +62,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
@@ -83,10 +85,14 @@ public class SampleUtils implements AutoCloseable {
     private final StructureTemplateManager structureTemplateManager;
     private final PreviewLevel previewLevel;
     private final Registry<Structure> structureRegistry;
+    private final ResourceKey<Level> dimension;
     private final NoiseGeneratorSettings noiseGeneratorSettings;
     private final MinecraftServer minecraftServer;
     private final ServerLevel serverLevel;
 
+    /**
+     * Create SampleUtils with a <b>real</b> Minecraft server
+     */
     public SampleUtils(
             @NotNull MinecraftServer server,
             BiomeSource biomeSource,
@@ -114,14 +120,14 @@ public class SampleUtils implements AutoCloseable {
         ResourceKey<LevelStem> levelStemResourceKey = this.registryAccess.registryOrThrow(LEVEL_STEM)
                 .getResourceKey(levelStem)
                 .orElseThrow();
-        ResourceKey<Level> levelResourceKey = Registries.levelStemToLevel(levelStemResourceKey);
+        dimension = Registries.levelStemToLevel(levelStemResourceKey);
 
         this.structureCheck = new StructureCheck(
                 null,
                 // Should never be required because `tryLoadFromStorage` must not be called
                 this.registryAccess,
                 this.structureTemplateManager,
-                levelResourceKey,
+                dimension,
                 this.chunkGenerator,
                 this.randomState,
                 this.levelHeightAccessor,
@@ -144,6 +150,9 @@ public class SampleUtils implements AutoCloseable {
         serverLevel = null;
     }
 
+    /**
+     * Create SampleUtils <b>and</b> a fake Minecraft server
+     */
     public SampleUtils(
             BiomeSource biomeSource,
             RandomState randomState,
@@ -214,7 +223,7 @@ public class SampleUtils implements AutoCloseable {
         ResourceKey<LevelStem> levelStemResourceKey = this.registryAccess.registryOrThrow(LEVEL_STEM)
                 .getResourceKey(levelStem)
                 .orElseThrow();
-        ResourceKey<Level> levelResourceKey = Registries.levelStemToLevel(levelStemResourceKey);
+        dimension = Registries.levelStemToLevel(levelStemResourceKey);
 
         // Some mods listen on the <init> of MinecraftServer
         LevelSettings levelSettings = new LevelSettings("temp", GameType.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(), worldDataConfiguration);
@@ -277,7 +286,7 @@ public class SampleUtils implements AutoCloseable {
                         worldStem.worldData(),
                         worldStem.worldData().overworldData()
                 ),
-                levelResourceKey,
+                dimension,
                 levelStem,
                 new ChunkProgressListener() {
                     @Override
@@ -304,7 +313,7 @@ public class SampleUtils implements AutoCloseable {
                 null, // Should never be required because `tryLoadFromStorage` must not be called
                 this.registryAccess,
                 this.structureTemplateManager,
-                levelResourceKey,
+                dimension,
                 this.chunkGenerator,
                 this.randomState,
                 this.levelHeightAccessor,
@@ -329,7 +338,7 @@ public class SampleUtils implements AutoCloseable {
                 Executors.newSingleThreadExecutor(),
                 levelStorageAccess,
                 new DummyServerLevelData(),
-                levelResourceKey,
+                dimension,
                 levelStem,
                 chunkProgressListener,
                 false, // is Debug
@@ -338,6 +347,13 @@ public class SampleUtils implements AutoCloseable {
                 false,
                 null
             );
+    }
+
+    public @Nullable ServerPlayer getPlayers(UUID playerId) {
+        if (minecraftServer instanceof DummyMinecraftServer) {
+            return null;
+        }
+        return minecraftServer.getPlayerList().getPlayer(playerId);
     }
 
     public ResourceKey<Biome> doSample(BlockPos pos) {
@@ -432,5 +448,9 @@ public class SampleUtils implements AutoCloseable {
 
     public RegistryAccess registryAccess() {
         return registryAccess;
+    }
+
+    public ResourceKey<Level> dimension() {
+        return dimension;
     }
 }

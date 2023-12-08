@@ -5,7 +5,12 @@ import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import caeruleusTait.world.preview.client.gui.widgets.lists.StructuresList;
 import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 public interface PreviewDisplayDataProvider {
     PreviewData previewData();
@@ -15,6 +20,10 @@ public interface PreviewDisplayDataProvider {
     StructuresList.StructureEntry structure4Id(int id);
 
     NativeImage[] structureIcons();
+
+    NativeImage playerIcon();
+
+    NativeImage spawnIcon();
 
     ItemStack[] structureItems();
 
@@ -36,7 +45,11 @@ public interface PreviewDisplayDataProvider {
 
     boolean setupFailed();
 
+    @NotNull PlayerData getPlayerData(UUID playerId);
+
     interface StructureRenderInfo {
         boolean show();
     }
+
+    record PlayerData(@Nullable BlockPos currentPos, @Nullable BlockPos spawnPos) {}
 }

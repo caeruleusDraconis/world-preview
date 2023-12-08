@@ -29,17 +29,22 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import org.apache.logging.log4j.core.jmx.Server;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -106,6 +111,8 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     private BiomesList.BiomeEntry[] allBiomes;
     private StructuresList.StructureEntry[] allStructures;
     private NativeImage[] allStructureIcons;
+    private NativeImage playerIcon;
+    private NativeImage spawnIcon;
     private List<SeedsList.SeedEntry> seedEntries;
 
     private boolean inhibitUpdates = true;
@@ -239,7 +246,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                 BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/
                 x -> renderSettings.hideAllStructures = !((ToggleButton) x).selected
         );
-        toggleShowStructures.selected = true;
+        toggleShowStructures.selected = !renderSettings.hideAllStructures;
         toggleShowStructures.active = false; // Deactivate first in case sampleStructures is off
         toRender.add(toggleShowStructures);
 
@@ -506,6 +513,22 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                     return null;
                 }
             });
+        }
+
+        //  - Player and spawn icon
+        final Optional<Resource> playerResource;
+        final Optional<Resource> spawnResource;
+        playerResource = builtinResourceManager.getResource(new ResourceLocation("world_preview:textures/etc/player.png"));
+        spawnResource = builtinResourceManager.getResource(new ResourceLocation("world_preview:textures/etc/bed.png"));
+        try {
+            try(InputStream inPlayer = playerResource.orElseThrow().open(); InputStream inSpawn = spawnResource.orElseThrow().open()) {
+                playerIcon = NativeImage.read(inPlayer);
+                spawnIcon = NativeImage.read(inSpawn);
+            }
+        } catch (IOException e) {
+            playerIcon = new NativeImage(16, 16, true);
+            spawnIcon = new NativeImage(16, 16, true);
+            e.printStackTrace();
         }
 
         //  - List entries
@@ -799,6 +822,16 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     }
 
     @Override
+    public NativeImage playerIcon() {
+        return playerIcon;
+    }
+
+    @Override
+    public NativeImage spawnIcon() {
+        return spawnIcon;
+    }
+
+    @Override
     public ItemStack[] structureItems() {
         return Arrays.stream(allStructures).map(StructuresList.StructureEntry::itemStack).toArray(ItemStack[]::new);
     }
@@ -849,6 +882,25 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     @Override
     public boolean setupFailed() {
         return setupFailed;
+    }
+
+    @Override
+    public @NotNull PlayerData getPlayerData(UUID playerId) {
+        if (workManager == null || workManager.sampleUtils() == null) {
+            return new PlayerData(null, null);
+        }
+        ServerPlayer player = workManager.sampleUtils().getPlayers(playerId);
+        if (player == null) {
+            return new PlayerData(null, null);
+        }
+        ResourceKey<Level> playerDimension = player.level().dimension();
+        ResourceKey<Level> respawnDimension = player.getRespawnDimension();
+        ResourceKey<Level> currentDimension = workManager.sampleUtils().dimension();
+
+        return new PlayerData(
+                currentDimension.equals(playerDimension) ? player.blockPosition() : null,
+                currentDimension.equals(respawnDimension) ? player.getRespawnPosition() : null
+        );
     }
 
     public ToggleButton toggleCaves() {

@@ -8,6 +8,7 @@ public class WorldPreviewConfig {
     public List<String> savedSeeds = new ArrayList<>();
 
     public boolean showInPauseMenu = true;
+    public boolean showPlayer = true;
     public boolean showControls = true;
     public boolean showFrameTime = false;
     public boolean buildFullVertChunk = false;
