@@ -520,7 +520,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                 }
                 if (resource.isEmpty()) {
                     LOGGER.error("FATAL ERROR LOADING: '{}' -- unable to load fallback!", x);
-                    return null;
+                    return new NativeImage(16, 16, true);
                 }
                 try {
                     try(InputStream in = resource.get().open()) {
@@ -528,7 +528,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    return null;
+                    return new NativeImage(16, 16, true);
                 }
             });
         }
