@@ -42,7 +42,6 @@ import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import org.apache.logging.log4j.core.jmx.Server;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,6 +50,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -118,6 +118,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     private boolean isUpdating = false;
     private boolean setupFailed = false;
     private final Executor reloadExecutor = Executors.newSingleThreadExecutor();
+    private final Executor serverThreadPoolExecutor;
     private final AtomicInteger reloadRevision = new AtomicInteger(0);
 
     private final List<AbstractWidget> toRender = new ArrayList<>();
@@ -132,6 +133,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         workManager = worldPreview.workManager();
         previewMappingData = worldPreview.biomeColorMap();
         renderSettings = worldPreview.renderSettings();
+        serverThreadPoolExecutor = worldPreview.serverThreadPoolExecutor();
 
         seedEdit = new EditBox(font, 0, 0, 100, LINE_HEIGHT - 2, SEED_FIELD);
         seedEdit.setHint(SEED_FIELD);
@@ -435,16 +437,33 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = dataProvider.layeredRegistryAccess(wcContext);
 
         workManager.cancel();
-        workManager.changeWorldGenState(
-                levelStem,
-                layeredRegistryAccess,
-                previewData,
-                dataProvider.worldOptions(wcContext),
-                worldDataConfiguration,
-                minecraft.getProxy(),
-                dataProvider.tempDataPackDir(),
-                dataProvider.minecraftServer()
-        );
+        Runnable changeWorldGenState = () -> {
+            workManager.changeWorldGenState(
+                    levelStem,
+                    layeredRegistryAccess,
+                    previewData,
+                    dataProvider.worldOptions(wcContext),
+                    worldDataConfiguration,
+                    minecraft.getProxy(),
+                    dataProvider.tempDataPackDir(),
+                    dataProvider.minecraftServer()
+            );
+        };
+
+        // Some forge mods require running the server setup in a specific thread pool to switch
+        // to the server specific logic (`EffectiveSide.get().isClient()`)
+        if (serverThreadPoolExecutor != null) {
+            try {
+                CompletableFuture.runAsync(changeWorldGenState, serverThreadPoolExecutor).get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            changeWorldGenState.run();
+        }
 
         // Biomes
         List<String> missing = Arrays.stream(previewData.biomeId2BiomeData())

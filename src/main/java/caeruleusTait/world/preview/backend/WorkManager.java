@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -22,9 +21,6 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,7 +51,6 @@ public class WorkManager {
     private DimensionType dimensionType;
     private ChunkGenerator chunkGenerator;
     private BiomeSource biomeSource;
-    private RandomState randomState;
     private ChunkSampler chunkSampler;
     private SampleUtils sampleUtils;
 
@@ -103,26 +98,11 @@ public class WorkManager {
         chunkSampler = renderSettings.samplerType.create(renderSettings.quartStride());
         previewData = _previewData;
 
-        if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
-            randomState = RandomState.create(
-                    noiseBasedChunkGenerator.generatorSettings().value(),
-                    _registryAccess.compositeAccess().lookupOrThrow(Registries.NOISE),
-                    _worldOptions.seed()
-            );
-        } else {
-            randomState = RandomState.create(
-                    NoiseGeneratorSettings.dummy(),
-                    _registryAccess.compositeAccess().lookupOrThrow(Registries.NOISE),
-                    _worldOptions.seed()
-            );
-        }
-
         LevelHeightAccessor levelHeightAccessor = LevelHeightAccessor.create(dimensionType.minY(), dimensionType.height());
         try {
             if (server == null) {
                 sampleUtils = new SampleUtils(
                         biomeSource,
-                        randomState,
                         chunkGenerator,
                         _registryAccess,
                         _worldOptions,
@@ -136,7 +116,6 @@ public class WorkManager {
                 sampleUtils = new SampleUtils(
                         server,
                         biomeSource,
-                        randomState,
                         chunkGenerator,
                         _worldOptions,
                         levelStem,
@@ -430,14 +409,6 @@ public class WorkManager {
         }
 
         return res;
-    }
-
-    public BiomeSource biomeSource() {
-        return biomeSource;
-    }
-
-    public RandomState randomState() {
-        return randomState;
     }
 
     public int yMin() {
