@@ -27,7 +27,6 @@ import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.RandomSequences;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
@@ -96,7 +95,6 @@ public class SampleUtils implements AutoCloseable {
     public SampleUtils(
             @NotNull MinecraftServer server,
             BiomeSource biomeSource,
-            RandomState randomState,
             ChunkGenerator chunkGenerator,
             WorldOptions worldOptions,
             LevelStem levelStem,
@@ -110,7 +108,6 @@ public class SampleUtils implements AutoCloseable {
         this.levelHeightAccessor = levelHeightAccessor;
         this.resourceManager = (CloseableResourceManager) minecraftServer.getResourceManager();
         this.biomeSource = biomeSource;
-        this.randomState = randomState;
         this.chunkGenerator = chunkGenerator;
         this.registryAccess = minecraftServer.registryAccess();
         this.structureRegistry = this.registryAccess.registryOrThrow(Registries.STRUCTURE);
@@ -121,6 +118,20 @@ public class SampleUtils implements AutoCloseable {
                 .getResourceKey(levelStem)
                 .orElseThrow();
         dimension = Registries.levelStemToLevel(levelStemResourceKey);
+
+        if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
+            randomState = RandomState.create(
+                    noiseBasedChunkGenerator.generatorSettings().value(),
+                    registryAccess.lookupOrThrow(Registries.NOISE),
+                    worldOptions.seed()
+            );
+        } else {
+            randomState = RandomState.create(
+                    NoiseGeneratorSettings.dummy(),
+                    registryAccess.lookupOrThrow(Registries.NOISE),
+                    worldOptions.seed()
+            );
+        }
 
         this.structureCheck = new StructureCheck(
                 null,
@@ -155,7 +166,6 @@ public class SampleUtils implements AutoCloseable {
      */
     public SampleUtils(
             BiomeSource biomeSource,
-            RandomState randomState,
             ChunkGenerator chunkGenerator,
             LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess,
             WorldOptions worldOptions,
@@ -196,7 +206,6 @@ public class SampleUtils implements AutoCloseable {
         }
 
         this.biomeSource = biomeSource;
-        this.randomState = randomState;
         this.chunkGenerator = chunkGenerator;
         this.registryAccess = layeredRegistryAccess.compositeAccess();
         this.structureRegistry = this.registryAccess.registryOrThrow(Registries.STRUCTURE);
@@ -264,13 +273,6 @@ public class SampleUtils implements AutoCloseable {
                 i -> chunkProgressListener
         );
 
-        // Noise / Heightmap stuff
-        if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
-            noiseGeneratorSettings = noiseBasedChunkGenerator.generatorSettings().value();
-        } else {
-            noiseGeneratorSettings = null;
-        }
-
         // All this stuff, just so we can give Forge a fake minecraft server...
         WorldPreview.get().loaderSpecificSetup(minecraftServer);
 
@@ -307,6 +309,23 @@ public class SampleUtils implements AutoCloseable {
                 false, // tickTime
                 null
         );
+
+        // Noise / Heightmap stuff -- and random state
+        if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
+            noiseGeneratorSettings = noiseBasedChunkGenerator.generatorSettings().value();
+            randomState = RandomState.create(
+                    noiseBasedChunkGenerator.generatorSettings().value(),
+                    registryAccess.lookupOrThrow(Registries.NOISE),
+                    worldOptions.seed()
+            );
+        } else {
+            noiseGeneratorSettings = null;
+            randomState = RandomState.create(
+                    NoiseGeneratorSettings.dummy(),
+                    registryAccess.lookupOrThrow(Registries.NOISE),
+                    worldOptions.seed()
+            );
+        }
 
         // This needs to happen *after* creating the dummy Minecraft server
         this.structureCheck = new StructureCheck(
