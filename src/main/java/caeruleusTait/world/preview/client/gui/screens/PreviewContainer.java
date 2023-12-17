@@ -124,7 +124,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     public PreviewContainer(Screen screen, PreviewContainerDataProvider previewContainerDataProvider) {
         final Font font = ((ScreenAccessor) screen).getFont();
         dataProvider = previewContainerDataProvider;
-        minecraft = ((ScreenAccessor) screen).getMinecraft();
+        minecraft = Minecraft.getInstance();
         allBiomes = new BiomesList.BiomeEntry[0];
         worldPreview = WorldPreview.get();
         cfg = worldPreview.cfg();

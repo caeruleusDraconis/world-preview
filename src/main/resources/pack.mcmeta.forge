@@ -1,6 +1,6 @@
 {
     "pack": {
-        "description": "WorldGen resources",
-        "pack_format": 12
+        "description": "World Preview resources",
+        "pack_format": 22
     }
 }

@@ -33,7 +33,7 @@ public abstract class PauseScreenMixin {
             locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void addWorldPreviewButton(CallbackInfo ci, GridLayout gridLayout, GridLayout.RowHelper rowHelper) {
-        Minecraft minecraft = ((ScreenAccessor) this).getMinecraft();
+        Minecraft minecraft = Minecraft.getInstance();
 
         // Don't show in Multiplayer
         if (minecraft.getSingleplayerServer() == null) {
@@ -54,7 +54,7 @@ public abstract class PauseScreenMixin {
 
     @Unique
     private void onPressWorldPreview(Button btn) {
-        Minecraft minecraft = ((ScreenAccessor) this).getMinecraft();
+        Minecraft minecraft = Minecraft.getInstance();
         minecraft.setScreen(new InGamePreviewScreen());
     }
 }
