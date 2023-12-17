@@ -84,7 +84,12 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
 
     private boolean clicked = false;
 
-    private record IconData(NativeImage img, DynamicTexture texture) {}
+    private record IconData(@NotNull NativeImage img, @NotNull DynamicTexture texture) {
+        public void close() {
+            texture.close();
+            img.close();
+        }
+    }
 
     public PreviewDisplay(Minecraft minecraft, PreviewDisplayDataProvider dataProvider, Component component) {
         super(0, 0, 100, 100, component);
@@ -96,11 +101,12 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         this.renderSettings = WorldPreview.get().renderSettings();
         this.config = WorldPreview.get().cfg();
         this.dummyIcon = new NativeImage(16, 16, true);
+        this.structureIcons = new IconData[0];
         resizeImage();
     }
 
     public void resizeImage() {
-        close();
+        closeDisplayTextures();
         previewImg = new NativeImage(NativeImage.Format.RGBA, texWidth, texHeight, true);
         previewTexture = new DynamicTexture(previewImg);
         scaleBlockPos = (QuartPos.SIZE / renderSettings.quartExpand()) * renderSettings.quartStride();
@@ -127,9 +133,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         PreviewData.BiomeData[] rawBiomeMap = dataProvider.previewData().biomeId2BiomeData();
         structureRenderInfoMap = dataProvider.renderStructureMap();
         structureItems = dataProvider.structureItems();
-        structureIcons = Arrays.stream(dataProvider.structureIcons())
-                .map(x -> new IconData(x, x == null ? null : new DynamicTexture(x)))
-                .toArray(IconData[]::new);
+        structureIcons = Arrays.stream(dataProvider.structureIcons()).map(x -> new IconData(x, new DynamicTexture(x))).toArray(IconData[]::new);
         playerIcon = new IconData(dataProvider.playerIcon(), new DynamicTexture(dataProvider.playerIcon()));
         spawnIcon = new IconData(dataProvider.spawnIcon(), new DynamicTexture(dataProvider.spawnIcon()));
         playerIcon.texture.upload();
@@ -154,7 +158,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
 
     private void closeIconTextures() {
         if (structureIcons != null) {
-            Arrays.stream(structureIcons).map(IconData::texture).forEach(DynamicTexture::close);
+            Arrays.stream(structureIcons).forEach(IconData::close);
         }
         if (playerIcon != null) {
             playerIcon.texture.close();
@@ -164,14 +168,18 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         }
     }
 
-    public void close() {
-        closeIconTextures();
+    private void closeDisplayTextures() {
         if (previewTexture != null) {
             previewTexture.close();
         }
         if (previewImg != null) {
             previewImg.close();
         }
+    }
+
+    public void close() {
+        closeIconTextures();
+        closeDisplayTextures();
     }
 
     @Override
