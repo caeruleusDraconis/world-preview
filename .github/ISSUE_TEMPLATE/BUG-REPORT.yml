@@ -1,8 +1,10 @@
 name: Bug Report
 description: File a bug report
-title: "[Bug]: "
 labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: "## Help us help you"
   - type: markdown
     attributes:
       value: "Please provide as much information as possible in order to help us address your issue!"
