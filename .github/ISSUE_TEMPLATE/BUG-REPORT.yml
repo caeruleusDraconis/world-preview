@@ -12,7 +12,6 @@ body:
       label: What happened?
       description: If possible, also provide links to your used mods.
       placeholder: Tell us what the issue is!
-      value: ""
     validations:
       required: true
   - type: dropdown
@@ -64,7 +63,6 @@ body:
       label: Minecraft Logs
       description: See [this guide for getting the latest minecraft logs](https://minecrafthopper.net/help/guides/getting-minecraft-latest-log/)!
       placeholder: Paste your latest Minecraft log here!
-      value: ""
     validations:
       required: true
   - type: textarea
@@ -73,7 +71,6 @@ body:
       label: Additional Information 
       description: For any other helpful details!
       placeholder: Any additional information, such as screenshots (if applicable) or more context.
-      value: ""
     validations:
       required: false
       
