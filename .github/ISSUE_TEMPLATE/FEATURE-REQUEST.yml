@@ -1,0 +1,17 @@
+name: Feature Request
+description: Request new features for World-Preview
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Feature Description
+
+        Please describe your request in as much detail as possible.
+  - type: textarea
+    id: feature-request
+    attributes:
+      label: Feature Request
+      placeholder: Your feature request goes here!
+    validations:
+      required: true
