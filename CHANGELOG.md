@@ -2,6 +2,18 @@
 
 This document contains a list of notable changes for world-preview.
 
+## [1.1.6] - 2024-01-01
+
+### 🐛 Bug Fixes
+
+-  Fix incorrect access widener issue [[#20]](https://github.com/caeruleusDraconis/world-preview/issues/20)
+
+
+### 📝 Documentation
+
+-  Added CHANGELOG.md and git-cliff config
+
+
 ## [1.1.5] - 2023-12-17
 
 ### ✨ Features
