@@ -27,7 +27,9 @@ public class WorldPreview implements ModInitializer {
 
     private static WorldPreview INSTANCE;
 
+    private Path configDir;
     private Path configFile;
+    private Path renderConfigFile;
     private Path missingColorsFile;
     private Path missingStructuresFile;
     private Path userColorConfigFile;
@@ -51,18 +53,18 @@ public class WorldPreview implements ModInitializer {
                 .setPrettyPrinting()
                 .create();
 
-        final Path configDir = FabricLoader.getInstance().getConfigDir().resolve("world_preview");
+        configDir = FabricLoader.getInstance().getConfigDir().resolve("world_preview");
         if (!Files.exists(configDir)) {
             configDir.toFile().mkdirs();
         }
         configFile = configDir.resolve("config.json");
+        renderConfigFile = configDir.resolve("renderConfig.json");
         missingColorsFile = configDir.resolve("missing-colors.json");
         missingStructuresFile = configDir.resolve("missing-structures.json");
         userColorConfigFile = configDir.resolve("biome-colors.json");
 
         loadConfig();
 
-        renderSettings = new RenderSettings();
         workManager = new WorkManager(renderSettings, cfg);
         previewMappingData = new PreviewMappingData();
     }
@@ -100,14 +102,24 @@ public class WorldPreview implements ModInitializer {
         return userColorConfigFile;
     }
 
+    public Path configDir() {
+        return configDir;
+    }
+
     public void loadConfig() {
         LOGGER.info("Loading config file: {}", configFile);
-        if (!Files.exists(configFile)) {
-            cfg = new WorldPreviewConfig();
-            return;
-        }
         try {
-            cfg = gson.fromJson(Files.readString(configFile), WorldPreviewConfig.class);
+            if (!Files.exists(configFile)) {
+                cfg = new WorldPreviewConfig();
+            } else {
+                cfg = gson.fromJson(Files.readString(configFile), WorldPreviewConfig.class);
+            }
+
+            if (!Files.exists(renderConfigFile)) {
+                renderSettings = new RenderSettings();
+            } else {
+                renderSettings = gson.fromJson(Files.readString(renderConfigFile), RenderSettings.class);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -117,12 +129,13 @@ public class WorldPreview implements ModInitializer {
         LOGGER.info("Saving config file: {}", configFile);
         try {
             Files.writeString(configFile, gson.toJson(cfg) + "\n");
+            Files.writeString(renderConfigFile, gson.toJson(renderSettings) + "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void writeMissingColors(List<String > missing) {
+    public void writeMissingColors(List<String> missing) {
         try {
             Files.deleteIfExists(missingColorsFile);
             if (missing.isEmpty()) {

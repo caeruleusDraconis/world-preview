@@ -5,10 +5,14 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.BitSet;
 import java.util.List;
 
-public abstract class PreviewSection {
+public abstract class PreviewSection implements Serializable {
     public static final int SHIFT = 8;
     public static final int SIZE = 1 << SHIFT;
     public static final int OFFSET = 1 << (SHIFT - 1);
@@ -91,7 +95,7 @@ public abstract class PreviewSection {
         return QuartPos.toBlock(quartZ);
     }
 
-    public record AccessData(int minX, int minZ, int maxX, int maxZ, boolean continueX, boolean continueZ) {
+    public record AccessData(int minX, int minZ, int maxX, int maxZ, boolean continueX, boolean continueZ) implements Serializable {
     }
 
     public record PreviewStruct(BlockPos center, short structureId, BoundingBox boundingBox) {

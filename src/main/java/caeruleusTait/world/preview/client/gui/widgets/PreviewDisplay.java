@@ -453,6 +453,10 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     }
 
     private void renderStructures(List<RenderHelper> renderData, GuiGraphics guiGraphics) {
+        if (!config.sampleStructures) {
+            return;
+        }
+
         final double guiScale = minecraft.getWindow().getGuiScale();
 
         // Draw structures

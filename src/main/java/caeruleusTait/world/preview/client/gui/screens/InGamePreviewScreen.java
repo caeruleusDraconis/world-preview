@@ -1,7 +1,11 @@
 package caeruleusTait.world.preview.client.gui.screens;
 
+import caeruleusTait.world.preview.RenderSettings;
+import caeruleusTait.world.preview.WorldPreview;
+import caeruleusTait.world.preview.backend.storage.PreviewStorage;
 import caeruleusTait.world.preview.client.WorldPreviewComponents;
 import caeruleusTait.world.preview.client.gui.PreviewContainerDataProvider;
+import caeruleusTait.world.preview.mixin.MinecraftServerAccessor;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -19,17 +23,22 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.LOADING_PREVIEW;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.SAVING_PREVIEW;
 import static net.minecraft.client.gui.screens.worldselection.CreateWorldScreen.FOOTER_SEPERATOR;
 
 public class InGamePreviewScreen extends Screen implements PreviewContainerDataProvider {
 
     private IntegratedServer integratedServer;
     private PreviewContainer previewContainer;
+    private final WorldPreview worldPreview = WorldPreview.get();
 
     public InGamePreviewScreen() {
         super(WorldPreviewComponents.TITLE_FULL);
@@ -67,6 +76,47 @@ public class InGamePreviewScreen extends Screen implements PreviewContainerDataP
         guiGraphics.drawCenteredString(minecraft.font, WorldPreviewComponents.TITLE_FULL, width / 2, 6, 0xFFFFFF);
         guiGraphics.blit(FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 30, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public void onClose() {
+        worldPreview.saveConfig();
+        previewContainer.close();
+        super.onClose();
+    }
+
+    @Override
+    public Path cacheDir() {
+        final var access = ((MinecraftServerAccessor) integratedServer).getStorageSource();
+        final Path previewDir = access.getLevelPath(LevelResource.ROOT).resolve("world-preview");
+        previewDir.toFile().mkdirs();
+        return previewDir;
+    }
+
+    private String filename() {
+        final RenderSettings settings = worldPreview.renderSettings();
+        return String.format("%s-%d-%s.zip", settings.dimension, settings.pixelsPerChunk(), settings.samplerType);
+    }
+
+    @Override
+    public void storePreviewStorage(long seed, PreviewStorage storage) {
+        if (!worldPreview.cfg().cacheInGame) {
+            return;
+        }
+        minecraft.forceSetScreen(new PreviewCacheLoadingScreen(SAVING_PREVIEW));
+        writeCacheFile(previewContainer.workManager().previewStorage(), cacheDir().resolve(filename()));
+    }
+
+    @Override
+    public PreviewStorage loadPreviewStorage(long seed, int yMin, int yMax) {
+        if (!worldPreview.cfg().cacheInGame) {
+            return new PreviewStorage(yMin, yMax);
+        }
+
+        minecraft.forceSetScreen(new PreviewCacheLoadingScreen(LOADING_PREVIEW));
+        final PreviewStorage res = readCacheFile(yMin, yMax, cacheDir().resolve(filename()));
+        minecraft.forceSetScreen(this);
+        return res;
     }
 
     /**

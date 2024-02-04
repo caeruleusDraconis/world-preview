@@ -6,6 +6,7 @@ import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.sampler.ChunkSampler;
 import caeruleusTait.world.preview.backend.storage.PreviewSection;
 import caeruleusTait.world.preview.backend.storage.PreviewStorage;
+import caeruleusTait.world.preview.backend.storage.PreviewStorageCacheManager;
 import caeruleusTait.world.preview.backend.worker.*;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -47,6 +48,7 @@ public class WorkManager {
 
     private final Object completedSynchro = new Object();
 
+    private WorldOptions worldOptions;
     private LevelStem levelStem;
     private DimensionType dimensionType;
     private ChunkGenerator chunkGenerator;
@@ -56,6 +58,7 @@ public class WorkManager {
 
     private PreviewData previewData;
     private PreviewStorage previewStorage;
+    private PreviewStorageCacheManager previewStorageCacheManager;
     private final RenderSettings renderSettings;
     private final WorldPreviewConfig config;
 
@@ -85,16 +88,18 @@ public class WorkManager {
             PreviewData _previewData,
             WorldOptions _worldOptions,
             WorldDataConfiguration _worldDataConfiguration,
+            PreviewStorageCacheManager _previewStorageCacheManager,
             Proxy proxy,
             @Nullable Path tempDataPackDir,
             @Nullable MinecraftServer server
     ) {
         cancel();
+        worldOptions = _worldOptions;
         levelStem = _levelStem;
         dimensionType = levelStem.type().value();
         chunkGenerator = levelStem.generator();
         biomeSource = chunkGenerator.getBiomeSource();
-        previewStorage = new PreviewStorage(renderSettings, yMin(), yMax());
+        previewStorageCacheManager = _previewStorageCacheManager;
         chunkSampler = renderSettings.samplerType.create(renderSettings.quartStride());
         previewData = _previewData;
 
@@ -105,7 +110,7 @@ public class WorkManager {
                         biomeSource,
                         chunkGenerator,
                         _registryAccess,
-                        _worldOptions,
+                        worldOptions,
                         levelStem,
                         levelHeightAccessor,
                         _worldDataConfiguration,
@@ -117,7 +122,7 @@ public class WorkManager {
                         server,
                         biomeSource,
                         chunkGenerator,
-                        _worldOptions,
+                        worldOptions,
                         levelStem,
                         levelHeightAccessor
                 );
@@ -125,6 +130,14 @@ public class WorkManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * MUST be called in the render thread and AFTER {@link #changeWorldGenState} has finished
+     */
+    public void postChangeWorldGenState() {
+        // This call MAY change screens and MUST thus be called in the render thread!
+        previewStorage = previewStorageCacheManager.loadPreviewStorage(worldOptions.seed(), yMin(), yMax());
 
         // Only create the executors at the end to ensure that there are no
         // null pointer exceptions
@@ -172,6 +185,11 @@ public class WorkManager {
             }
         }
 
+        if (previewStorageCacheManager != null) {
+            previewStorageCacheManager.storePreviewStorage(worldOptions.seed(), previewStorage);
+        }
+
+        worldOptions = null;
         levelStem = null;
         dimensionType = null;
         chunkGenerator = null;
@@ -184,6 +202,7 @@ public class WorkManager {
         futures.clear();
         executorService = null;
         queueChunksService = null;
+        previewStorageCacheManager = null;
     }
 
     private boolean requeueOnYOnlyChange() {

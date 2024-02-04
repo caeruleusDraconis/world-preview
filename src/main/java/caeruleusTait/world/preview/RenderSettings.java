@@ -22,8 +22,8 @@ public class RenderSettings {
     public ResourceLocation dimension = null;
 
     public boolean hideAllStructures = false;
-    public boolean showHeightMap = false;
-    public boolean showIntersections = false;
+    public transient boolean showHeightMap = false;
+    public transient boolean showIntersections = false;
 
     public BlockPos center() {
         return center;

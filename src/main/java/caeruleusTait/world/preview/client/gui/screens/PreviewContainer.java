@@ -444,6 +444,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                     previewData,
                     dataProvider.worldOptions(wcContext),
                     worldDataConfiguration,
+                    dataProvider,
                     minecraft.getProxy(),
                     dataProvider.tempDataPackDir(),
                     dataProvider.minecraftServer()
@@ -464,6 +465,9 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         } else {
             changeWorldGenState.run();
         }
+
+        // Do NOT run this in the lambda because this call might change screens
+        workManager.postChangeWorldGenState();
 
         // Biomes
         List<String> missing = Arrays.stream(previewData.biomeId2BiomeData())
@@ -802,6 +806,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         structuresList.setRenderTopAndBottom(false);
     }
 
+    @Override
     public void close() {
         workManager.cancel();
         previewDisplay.close();
@@ -867,6 +872,10 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     @Override
     public PreviewData previewData() {
         return previewData;
+    }
+
+    public WorkManager workManager() {
+        return workManager;
     }
 
     @Override

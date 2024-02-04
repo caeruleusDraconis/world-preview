@@ -1,7 +1,12 @@
 package caeruleusTait.world.preview.client.gui.screens;
 
+import caeruleusTait.world.preview.RenderSettings;
+import caeruleusTait.world.preview.WorldPreview;
+import caeruleusTait.world.preview.backend.storage.PreviewStorage;
 import caeruleusTait.world.preview.client.gui.PreviewContainerDataProvider;
+import caeruleusTait.world.preview.mixin.MinecraftServerAccessor;
 import caeruleusTait.world.preview.mixin.client.CreateWorldScreenAccessor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -25,6 +30,7 @@ import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,18 +41,21 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-import static caeruleusTait.world.preview.client.WorldPreviewComponents.TITLE;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.*;
 
 public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvider {
 
     private final CreateWorldScreen createWorldScreen;
     private final WorldCreationUiState uiState;
     private final PreviewContainer previewContainer;
+    private final WorldPreview worldPreview = WorldPreview.get();
+    private final Minecraft minecraft;
 
     private final Executor loadingExecutor = Executors.newFixedThreadPool(2);
 
-    public PreviewTab(CreateWorldScreen screen) {
+    public PreviewTab(CreateWorldScreen screen, Minecraft _minecraft) {
         createWorldScreen = screen;
+        minecraft = _minecraft;
         uiState = ((CreateWorldScreenAccessor) screen).getUiState();
         previewContainer = new PreviewContainer(screen, this);
     }
@@ -113,6 +122,40 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Path cacheDir() {
+        final Path previewDir = worldPreview.configDir().resolve("world-preview");
+        previewDir.toFile().mkdirs();
+        return previewDir;
+    }
+
+    private String filename(long seed) {
+        final RenderSettings settings = worldPreview.renderSettings();
+        return String.format("%s-%s-%d-%s.zip", seed, settings.dimension, settings.pixelsPerChunk(), settings.samplerType);
+    }
+
+    @Override
+    public void storePreviewStorage(long seed, PreviewStorage storage) {
+        if (!worldPreview.cfg().cacheInNew) {
+            return;
+        }
+        minecraft.forceSetScreen(new PreviewCacheLoadingScreen(SAVING_PREVIEW));
+        writeCacheFile(previewContainer.workManager().previewStorage(), cacheDir().resolve(filename(seed)));
+        minecraft.forceSetScreen(createWorldScreen);
+    }
+
+    @Override
+    public PreviewStorage loadPreviewStorage(long seed, int yMin, int yMax) {
+        if (!worldPreview.cfg().cacheInNew) {
+            return new PreviewStorage(yMin, yMax);
+        }
+
+        minecraft.forceSetScreen(new PreviewCacheLoadingScreen(LOADING_PREVIEW));
+        final PreviewStorage res = readCacheFile(yMin, yMax, cacheDir().resolve(filename(seed)));
+        minecraft.forceSetScreen(createWorldScreen);
+        return res;
     }
 
     public PreviewContainer mainScreenWidget() {

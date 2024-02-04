@@ -1,6 +1,7 @@
 package caeruleusTait.world.preview.backend.storage;
 
 import caeruleusTait.world.preview.RenderSettings;
+import caeruleusTait.world.preview.WorldPreview;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -8,9 +9,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.ChunkPos;
 
+import java.io.*;
+import java.util.Arrays;
+
 import static caeruleusTait.world.preview.backend.WorkManager.Y_BLOCK_SHIFT;
 
-public class PreviewStorage {
+public class PreviewStorage implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -275836689822028264L;
 
     public static final long FLAG_BITS = 4;
     public static final long FLAG_MASK = (1L << FLAG_BITS) - 1L;
@@ -29,19 +36,17 @@ public class PreviewStorage {
     public static final long FLAG_INTERSECT = 0b0011;
     public static final long FLAG_STRUCT_REF = 0b1111;
 
-    private final Long2ObjectMap<PreviewSection>[] sections;
-    private final RenderSettings renderSettings;
+    private transient Long2ObjectMap<PreviewSection>[] sections;
 
     private final int yMin;
     private final int yMax;
 
     @SuppressWarnings("unchecked")
-    public PreviewStorage(RenderSettings renderSettings, int yMin, int yMax) {
+    public PreviewStorage(int yMin, int yMax) {
         sections = new Long2ObjectMap[((yMax - yMin) >> Y_BLOCK_SHIFT) + 1];
         for (int i = 0; i < sections.length; ++i) {
             sections[i] = new Long2ObjectOpenHashMap<>(1024, Hash.FAST_LOAD_FACTOR);
         }
-        this.renderSettings = renderSettings;
         this.yMin = yMin;
         this.yMax = yMax;
     }
@@ -75,11 +80,12 @@ public class PreviewStorage {
         if (flags == FLAG_STRUCT_START) {
             return new PreviewSectionStructure(quartX, quartZ);
         }
-        return switch (renderSettings.quartStride()) {
+        final int quartStride = WorldPreview.get().renderSettings().quartStride();
+        return switch (quartStride) {
             case 1 -> new PreviewSectionFull(quartX, quartZ);
             case 2 -> new PreviewSectionHalf(quartX, quartZ);
             case 4 -> new PreviewSectionQuarter(quartX, quartZ);
-            default -> throw new IllegalStateException("Unexpected quartStride value: " + renderSettings.quartStride());
+            default -> throw new IllegalStateException("Unexpected quartStride value: " + quartStride);
         };
     }
 
@@ -120,5 +126,45 @@ public class PreviewStorage {
 
     public static long compressXYZ(long x, long z, long flags) {
         return (x & XZ_MASK) << X_SHIFT | (z & XZ_MASK) << Z_SHIFT | (flags & FLAG_MASK) << FLAG_SHIFT;
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+
+        // Write the sections
+        oos.writeInt(sections.length);
+        for (Long2ObjectMap<PreviewSection> ySec : sections) {
+            final var entrySet = ySec.long2ObjectEntrySet();
+            oos.writeInt(entrySet.size());
+            for (var x : entrySet) {
+                oos.writeLong(x.getLongKey());
+                oos.writeObject(x.getValue());
+            }
+        }
+    }
+
+    @Serial
+    @SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+
+        // Read the sections
+        sections = new Long2ObjectMap[((yMax - yMin) >> Y_BLOCK_SHIFT) + 1];
+
+        final int serializedSize = ois.readInt();
+        if (serializedSize != sections.length) {
+            throw new IOException("serializedSize != sections.length: " + serializedSize + " != " + sections.length);
+        }
+
+        for (int i = 0; i < sections.length; i++) {
+            sections[i] = new Long2ObjectOpenHashMap<>(1024, Hash.FAST_LOAD_FACTOR);
+            final int size = ois.readInt();
+            for (int j = 0; j < size; ++j) {
+                final long key = ois.readLong();
+                final PreviewSection section = (PreviewSection) ois.readObject();
+                sections[i].put(key, section);
+            }
+        }
     }
 }

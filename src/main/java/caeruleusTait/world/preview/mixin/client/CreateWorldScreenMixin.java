@@ -33,7 +33,7 @@ public abstract class CreateWorldScreenMixin {
             )
     )
     private void appendPreviewTab(CallbackInfo ci) {
-        previewTab = new PreviewTab((CreateWorldScreen) (Object) this);
+        previewTab = new PreviewTab((CreateWorldScreen) (Object) this, ((ScreenAccessor) this).getMinecraft());
 
         final TabNavigationBar originalRaw = tabNavigationBar;
         final TabNavigationBarAccessor original = (TabNavigationBarAccessor)originalRaw;

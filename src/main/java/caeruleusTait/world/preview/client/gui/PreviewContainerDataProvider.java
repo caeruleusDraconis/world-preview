@@ -1,5 +1,6 @@
 package caeruleusTait.world.preview.client.gui;
 
+import caeruleusTait.world.preview.backend.storage.PreviewStorageCacheManager;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
-public interface PreviewContainerDataProvider {
+public interface PreviewContainerDataProvider extends PreviewStorageCacheManager {
 
     @Nullable WorldCreationContext previewWorldCreationContext();
 
