@@ -412,11 +412,11 @@ public class WorkManager {
     }
 
     public int yMin() {
-        return dimensionType.minY();
+        return dimensionType == null ? 0 : dimensionType.minY();
     }
 
     public int yMax() {
-        return yMin() + dimensionType.height();
+        return yMin() + (dimensionType == null ? 256 : dimensionType.height());
     }
 
     public PreviewStorage previewStorage() {
