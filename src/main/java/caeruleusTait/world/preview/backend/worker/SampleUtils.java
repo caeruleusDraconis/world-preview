@@ -375,13 +375,6 @@ public class SampleUtils implements AutoCloseable {
         return minecraftServer.getPlayerList().getPlayer(playerId);
     }
 
-    public @Nullable ServerPlayer getPlayers(UUID playerId) {
-        if (minecraftServer instanceof DummyMinecraftServer) {
-            return null;
-        }
-        return minecraftServer.getPlayerList().getPlayer(playerId);
-    }
-
     public ResourceKey<Biome> doSample(BlockPos pos) {
         return biomeSource.getNoiseBiome(
                 QuartPos.fromBlock(pos.getX()),
