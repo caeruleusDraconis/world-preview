@@ -26,7 +26,6 @@ import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 
@@ -94,8 +93,7 @@ public class InGamePreviewScreen extends Screen implements PreviewContainerDataP
     }
 
     private String filename() {
-        final RenderSettings settings = worldPreview.renderSettings();
-        return String.format("%s-%d-%s.zip", settings.dimension, settings.pixelsPerChunk(), settings.samplerType);
+        return String.format("%s.zip", cacheFileCompatPart());
     }
 
     @Override

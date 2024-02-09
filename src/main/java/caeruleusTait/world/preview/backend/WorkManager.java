@@ -332,6 +332,13 @@ public class WorkManager {
             }
         }
 
+        /* Compression debug code
+        if (units == 0) {
+            List<Short> x = previewStorage.compressionStatistics();
+            LOGGER.info("Compression statistics: {}", Arrays.toString(x.toArray()));
+        }
+         */
+
         final Instant end = Instant.now();
         LOGGER.info(
                 "Queued {} chunks for generation using {} batches [{} ms] {}",

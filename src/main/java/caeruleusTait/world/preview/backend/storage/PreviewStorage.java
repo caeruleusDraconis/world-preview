@@ -1,6 +1,5 @@
 package caeruleusTait.world.preview.backend.storage;
 
-import caeruleusTait.world.preview.RenderSettings;
 import caeruleusTait.world.preview.WorldPreview;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -10,7 +9,8 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.ChunkPos;
 
 import java.io.*;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import static caeruleusTait.world.preview.backend.WorkManager.Y_BLOCK_SHIFT;
 
@@ -81,6 +81,14 @@ public class PreviewStorage implements Serializable {
             return new PreviewSectionStructure(quartX, quartZ);
         }
         final int quartStride = WorldPreview.get().renderSettings().quartStride();
+        if (WorldPreview.get().cfg().enableCompression && flags != FLAG_HEIGHT) {
+            return switch (quartStride) {
+                case 1 -> new PreviewSectionCompressed.Full(quartX, quartZ);
+                case 2 -> new PreviewSectionCompressed.Half(quartX, quartZ);
+                case 4 -> new PreviewSectionCompressed.Quarter(quartX, quartZ);
+                default -> throw new IllegalStateException("Unexpected quartStride value: " + quartStride);
+            };
+        }
         return switch (quartStride) {
             case 1 -> new PreviewSectionFull(quartX, quartZ);
             case 2 -> new PreviewSectionHalf(quartX, quartZ);
@@ -166,5 +174,18 @@ public class PreviewStorage implements Serializable {
                 sections[i].put(key, section);
             }
         }
+    }
+
+    public List<Short> compressionStatistics() {
+        List<Short> res = new ArrayList<>();
+        for (var x : sections) {
+            for (PreviewSection section : x.values()) {
+                if (!(section instanceof PreviewSectionCompressed cSection)) {
+                    continue;
+                }
+                res.add(cSection.mapSize());
+            }
+        }
+        return res;
     }
 }

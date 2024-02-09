@@ -28,6 +28,9 @@ public class CacheTab extends GridLayoutTab {
 
         WGCheckbox cbGameEnable = new WGCheckbox(0, 0, LINE_WIDTH, LINE_HEIGHT, SETTINGS_CACHE_G_ENABLE, x -> cfg.cacheInGame = x.selected(), cfg.cacheInGame);
         WGCheckbox cbNewEnable = new WGCheckbox(0, 0, LINE_WIDTH, LINE_HEIGHT, SETTINGS_CACHE_N_ENABLE, x -> cfg.cacheInNew = x.selected(), cfg.cacheInNew);
+        WGCheckbox cbCompressEnable = new WGCheckbox(0, 0, LINE_WIDTH, LINE_HEIGHT, SETTINGS_CACHE_COMPRESSION, x -> cfg.enableCompression = x.selected(), cfg.enableCompression);
+
+        cbCompressEnable.setTooltip(Tooltip.create(SETTINGS_CACHE_COMPRESSION_TOOLTIP));
 
         Button btnClear = Button
                 .builder(SETTINGS_CACHE_CLEAR, this::onClearCache)
@@ -41,6 +44,9 @@ public class CacheTab extends GridLayoutTab {
         rowHelper.addChild(cbNewEnable);
         rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, LINE_WIDTH, LINE_HEIGHT, WGLabel.TextAlignment.CENTER, Component.empty(), 0xFFFFFF));
         rowHelper.addChild(btnClear);
+        rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, LINE_WIDTH, LINE_HEIGHT, WGLabel.TextAlignment.CENTER, Component.empty(), 0xFFFFFF));
+        rowHelper.addChild(new WGLabel(minecraft.font, 0, 0, LINE_WIDTH, LINE_HEIGHT, WGLabel.TextAlignment.CENTER, Component.empty(), 0xFFFFFF));
+        rowHelper.addChild(cbCompressEnable);
     }
 
     private void onClearCache(Button btn) {

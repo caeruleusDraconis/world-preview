@@ -72,6 +72,8 @@
   "world_preview.settings.cache.new.enable": "Enable caching for the World-Creation preview",
   "world_preview.settings.cache.clear": "Clear the current cache",
   "world_preview.settings.cache.clear.tooltip": "Clicking this button will clear the §6§lcurrent§r cache.\n\nIf the preview was opened from a running world, only the preview cache for §lthis§r world will be cleared. If the preview was opened during world creation, §oall§r previews for §oall§r seeds for the world creation will be cleared.",
+  "world_preview.settings.cache.compression": "Enable preview data compression",
+  "world_preview.settings.cache.compression.tooltip": "Enabling this option will reduce RAM usage but may slightly decrease the preview generation performance",
   "world_preview.settings.heightmap.title": "Heightmap",
   "world_preview.settings.heightmap.disabled": "§6Heightmap sampling is disabled in the general settings§r",
   "world_preview.settings.heightmap.presets": "Height section presets",

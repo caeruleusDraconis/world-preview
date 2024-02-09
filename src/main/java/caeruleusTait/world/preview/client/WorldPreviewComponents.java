@@ -71,6 +71,8 @@ public class WorldPreviewComponents {
     public static final Component SETTINGS_CACHE_N_ENABLE = Component.translatable("world_preview.settings.cache.new.enable");
     public static final Component SETTINGS_CACHE_CLEAR = Component.translatable("world_preview.settings.cache.clear");
     public static final Component SETTINGS_CACHE_CLEAR_TOOLTIP = Component.translatable("world_preview.settings.cache.clear.tooltip");
+    public static final Component SETTINGS_CACHE_COMPRESSION = Component.translatable("world_preview.settings.cache.compression");
+    public static final Component SETTINGS_CACHE_COMPRESSION_TOOLTIP = Component.translatable("world_preview.settings.cache.compression.tooltip");
 
     // - Heightmap settings
     public static final Component SETTINGS_HEIGHTMAP_TITLE = Component.translatable("world_preview.settings.heightmap.title");

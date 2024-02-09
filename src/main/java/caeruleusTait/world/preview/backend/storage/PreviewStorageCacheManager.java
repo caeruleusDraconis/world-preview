@@ -1,6 +1,8 @@
 package caeruleusTait.world.preview.backend.storage;
 
+import caeruleusTait.world.preview.RenderSettings;
 import caeruleusTait.world.preview.WorldPreview;
+import caeruleusTait.world.preview.WorldPreviewConfig;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -12,11 +14,27 @@ import java.util.zip.ZipOutputStream;
 
 public interface PreviewStorageCacheManager {
 
+    int CACHE_FORMAT_VERSION = 1;
+
     PreviewStorage loadPreviewStorage(long seed, int yMin, int yMax);
 
     void storePreviewStorage(long seed, PreviewStorage storage);
 
     Path cacheDir();
+
+    default String cacheFileCompatPart() {
+        final WorldPreview worldPreview = WorldPreview.get();
+        final RenderSettings settings = worldPreview.renderSettings();
+        final WorldPreviewConfig cfg = worldPreview.cfg();
+
+        long flags = 0;
+        flags |= CACHE_FORMAT_VERSION & 0b1111;
+        flags |= (settings.samplerType.ordinal() & 0b1111) << 4;
+        flags |= (PreviewSection.SHIFT & 0b1111) << 8;
+        flags |= cfg.enableCompression ? 1 << 12 : 0;
+
+        return String.format("%s-%d-%d", settings.dimension, settings.pixelsPerChunk(), flags);
+    }
 
     default void clearCache() {
         try (var stream = Files.walk(cacheDir())) {

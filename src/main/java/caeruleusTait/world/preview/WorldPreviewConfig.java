@@ -21,6 +21,7 @@ public class WorldPreviewConfig {
     public boolean onlySampleInVisualRange = true;
     public boolean cacheInGame = true;
     public boolean cacheInNew = false;
+    public boolean enableCompression = true;
     public String colorMap = "world_preview:inferno";
 
     private int numThreads = Math.max(Runtime.getRuntime().availableProcessors() - 1, 1);

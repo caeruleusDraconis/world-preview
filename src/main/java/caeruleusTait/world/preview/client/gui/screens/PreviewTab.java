@@ -132,8 +132,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
     }
 
     private String filename(long seed) {
-        final RenderSettings settings = worldPreview.renderSettings();
-        return String.format("%s-%s-%d-%s.zip", seed, settings.dimension, settings.pixelsPerChunk(), settings.samplerType);
+        return String.format("%s-%s.zip", seed, cacheFileCompatPart());
     }
 
     @Override
