@@ -75,8 +75,21 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
 
     public abstract int xzToIdx(int x, int z);
 
-    public synchronized short get(int x, int z) {
+    public short get(int x, int z) {
         final int idx = xzToIdx(x, z);
+        // Using synchronized is expensive. Solution: Only require eventual correctness for
+        // reading and write the compression change in such a way to decrease the risk of
+        // IndexOutOfBoundsException as much as possible.
+        //
+        // If still something goes wrong, catch the IndexOutOfBoundsException and return MIN_VALUE.
+        try {
+            return getReal(idx);
+        } catch (IndexOutOfBoundsException e) {
+            return Short.MIN_VALUE;
+        }
+    }
+
+    private short getReal(int idx) {
         return switch (mapData.length) {
             // The entire section only contains one single value
             case 0 -> data[0];
@@ -173,9 +186,9 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
             // Grow first level compression to second level compression
             case 4 -> {
                 // Grow mapData
-                mapData = Arrays.copyOf(mapData, 16);
-                mapData[4] = value;
-                Arrays.fill(mapData, 5, 16, Short.MIN_VALUE);
+                short[] newMapData = Arrays.copyOf(mapData, 16);
+                newMapData[4] = value;
+                Arrays.fill(newMapData, 5, 16, Short.MIN_VALUE);
 
                 // Grow data
                 short[] newData = new short[data.length * 2];
@@ -184,6 +197,9 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
                     newData[i * 2 + 0] = (short) ((((s >> 0) & 0b11) << 0) | (((s >>  2) & 0b11) << 4) | (((s >>  4) & 0b11) << 8) | (((s >>  6) & 0b11) << 12));
                     newData[i * 2 + 1] = (short) ((((s >> 8) & 0b11) << 0) | (((s >> 10) & 0b11) << 4) | (((s >> 12) & 0b11) << 8) | (((s >> 14) & 0b11) << 12));
                 }
+
+                // Make the change as "atomic" as possible to reduce the risk of `IndexOutOfBoundsException`s
+                mapData = newMapData;
                 data = newData;
                 yield 4;
             }
@@ -191,9 +207,9 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
             // Grow second level compression to third level compression
             case 16 -> {
                 // Grow mapData
-                mapData = Arrays.copyOf(mapData, 256);
-                mapData[16] = value;
-                Arrays.fill(mapData, 17, 256, Short.MIN_VALUE);
+                short[] newMapData = Arrays.copyOf(mapData, 256);
+                newMapData[16] = value;
+                Arrays.fill(newMapData, 17, 256, Short.MIN_VALUE);
 
                 // Grow data
                 short[] newData = new short[data.length * 2];
@@ -202,6 +218,8 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
                     newData[i * 2 + 0] = (short) ((((s >> 0) & 0b1111) << 0) | (((s >>  4) & 0b1111) << 8));
                     newData[i * 2 + 1] = (short) ((((s >> 8) & 0b1111) << 0) | (((s >> 12) & 0b1111) << 8));
                 }
+                // Make the change as "atomic" as possible to reduce the risk of `IndexOutOfBoundsException`s
+                mapData = newMapData;
                 data = newData;
                 yield 16;
             }
@@ -215,9 +233,9 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
                     newData[i * 2 + 0] = mapData[((s >> 0) & 0b11111111)];
                     newData[i * 2 + 1] = mapData[((s >> 8) & 0b11111111)];
                 }
-                data = newData;
 
                 mapData = new short[1]; // There is no cache (magic array length 1)
+                data = newData;
 
                 // No more compression --> no map --> no index, just the raw value
                 yield value;
