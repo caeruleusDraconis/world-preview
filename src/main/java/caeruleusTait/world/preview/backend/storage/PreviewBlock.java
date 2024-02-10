@@ -40,7 +40,7 @@ public class PreviewBlock implements Serializable {
             return new PreviewSectionStructure(quartX, quartZ);
         }
         final int quartStride = WorldPreview.get().renderSettings().quartStride();
-        if (WorldPreview.get().cfg().enableCompression && flags != FLAG_HEIGHT) {
+        if (WorldPreview.get().cfg().enableCompression) {
             return switch (quartStride) {
                 case 1 -> new PreviewSectionCompressed.Full(quartX, quartZ);
                 case 2 -> new PreviewSectionCompressed.Half(quartX, quartZ);
