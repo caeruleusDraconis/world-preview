@@ -238,7 +238,7 @@ public class SampleUtils implements AutoCloseable {
         WorldStem worldStem = new WorldStem(resourceManager, reloadableServerResources, layeredRegistryAccess, primaryLevelData);
 
         minecraftServer = new DummyMinecraftServer(
-                null,
+                new Thread(() -> {}), // Dummy thread is required for the spark mod
                 levelStorageAccess,
                 packRepository,
                 worldStem,
