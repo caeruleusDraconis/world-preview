@@ -1,6 +1,7 @@
 package caeruleusTait.world.preview.backend;
 
 import caeruleusTait.world.preview.RenderSettings;
+import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.WorldPreviewConfig;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.sampler.ChunkSampler;
@@ -34,10 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.BiFunction;
 
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
@@ -177,9 +175,20 @@ public class WorkManager {
     public void cancel() {
         shutdownExecutors();
 
+        final Executor serverThreadPoolExecutor = WorldPreview.get().serverThreadPoolExecutor();
         if (sampleUtils != null) {
             try {
-                sampleUtils.close();
+                if (serverThreadPoolExecutor != null) {
+                    CompletableFuture.runAsync(() -> {
+                        try {
+                            sampleUtils.close();
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, serverThreadPoolExecutor).get();
+                } else {
+                    sampleUtils.close();
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
