@@ -6,6 +6,8 @@ public class WorldPreviewComponents {
     // Main view components
     public static final Component TITLE = Component.translatable("world_preview.preview.title");
     public static final Component TITLE_FULL = Component.translatable("world_preview.preview.title-full");
+    public static final Component SAVING_PREVIEW = Component.translatable("world_preview.preview.saving");
+    public static final Component LOADING_PREVIEW = Component.translatable("world_preview.preview.loading");
     public static final Component SEED_FIELD = Component.translatable("world_preview.preview.seed-field");
     public static final Component SEED_LABEL = Component.translatable("world_preview.preview.seed-label");
     public static final Component BTN_RANDOM = Component.translatable("world_preview.preview.btn-random");
@@ -25,6 +27,7 @@ public class WorldPreviewComponents {
 
     // Error message on setup
     public static final Component MSG_ERROR_SETUP_FAILED = Component.translatable("world_preview.preview.error.setup-failed");
+    public static final Component MSG_PREVIEW_SETUP_LOADING = Component.translatable("world_preview.preview.msg.loading");
 
     // Settings
     public static final Component SETTINGS_TITLE = Component.translatable("world_preview.settings.title");
@@ -61,6 +64,16 @@ public class WorldPreviewComponents {
     public static final Component SETTINGS_SAMPLE_PIXELS_TITLE_2 = Component.translatable("world_preview.settings.sample.numChunk.title2");
     public static final Component SETTINGS_SAMPLE_SAMPLE_TITLE_1 = Component.translatable("world_preview.settings.sample.sampler.title1");
     public static final Component SETTINGS_SAMPLE_SAMPLE_TITLE_2 = Component.translatable("world_preview.settings.sample.sampler.title2");
+
+    // - Caching settings
+    public static final Component SETTINGS_CACHE_TITLE = Component.translatable("world_preview.settings.cache.title");
+    public static final Component SETTINGS_CACHE_DESC = Component.translatable("world_preview.settings.cache.desc");
+    public static final Component SETTINGS_CACHE_G_ENABLE = Component.translatable("world_preview.settings.cache.game.enable");
+    public static final Component SETTINGS_CACHE_N_ENABLE = Component.translatable("world_preview.settings.cache.new.enable");
+    public static final Component SETTINGS_CACHE_CLEAR = Component.translatable("world_preview.settings.cache.clear");
+    public static final Component SETTINGS_CACHE_CLEAR_TOOLTIP = Component.translatable("world_preview.settings.cache.clear.tooltip");
+    public static final Component SETTINGS_CACHE_COMPRESSION = Component.translatable("world_preview.settings.cache.compression");
+    public static final Component SETTINGS_CACHE_COMPRESSION_TOOLTIP = Component.translatable("world_preview.settings.cache.compression.tooltip");
 
     // - Heightmap settings
     public static final Component SETTINGS_HEIGHTMAP_TITLE = Component.translatable("world_preview.settings.heightmap.title");

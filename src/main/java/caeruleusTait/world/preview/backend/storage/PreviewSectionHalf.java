@@ -2,10 +2,15 @@ package caeruleusTait.world.preview.backend.storage;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.List;
 
 public class PreviewSectionHalf extends PreviewSection {
+
+    @Serial
+    private static final long serialVersionUID = 2274224369048667840L;
+
     private final short[] data = new short[HALF_SIZE * HALF_SIZE];
 
     public PreviewSectionHalf(int quartX, int quartZ) {

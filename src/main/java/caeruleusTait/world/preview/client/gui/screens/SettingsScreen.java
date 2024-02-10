@@ -46,6 +46,7 @@ public class SettingsScreen extends Screen {
         tabNavigationBar = TabNavigationBar.builder(tabManager, this.width)
                 .addTabs(
                         new GeneralTab(minecraft),
+                        new CacheTab(minecraft, previewContainer.dataProvider()),
                         new SamplingTab(minecraft),
                         new HeightmapTab(minecraft, previewContainer.previewData()),
                         new DimensionsTab(minecraft, previewContainer.levelStemKeys()),

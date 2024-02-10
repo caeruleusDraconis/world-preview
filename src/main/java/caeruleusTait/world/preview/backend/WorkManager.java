@@ -1,11 +1,13 @@
 package caeruleusTait.world.preview.backend;
 
 import caeruleusTait.world.preview.RenderSettings;
+import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.WorldPreviewConfig;
 import caeruleusTait.world.preview.backend.color.PreviewData;
 import caeruleusTait.world.preview.backend.sampler.ChunkSampler;
 import caeruleusTait.world.preview.backend.storage.PreviewSection;
 import caeruleusTait.world.preview.backend.storage.PreviewStorage;
+import caeruleusTait.world.preview.backend.storage.PreviewStorageCacheManager;
 import caeruleusTait.world.preview.backend.worker.*;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -33,10 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.BiFunction;
 
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
@@ -47,6 +46,7 @@ public class WorkManager {
 
     private final Object completedSynchro = new Object();
 
+    private WorldOptions worldOptions;
     private LevelStem levelStem;
     private DimensionType dimensionType;
     private ChunkGenerator chunkGenerator;
@@ -56,6 +56,7 @@ public class WorkManager {
 
     private PreviewData previewData;
     private PreviewStorage previewStorage;
+    private PreviewStorageCacheManager previewStorageCacheManager;
     private final RenderSettings renderSettings;
     private final WorldPreviewConfig config;
 
@@ -85,16 +86,18 @@ public class WorkManager {
             PreviewData _previewData,
             WorldOptions _worldOptions,
             WorldDataConfiguration _worldDataConfiguration,
+            PreviewStorageCacheManager _previewStorageCacheManager,
             Proxy proxy,
             @Nullable Path tempDataPackDir,
             @Nullable MinecraftServer server
     ) {
         cancel();
+        worldOptions = _worldOptions;
         levelStem = _levelStem;
         dimensionType = levelStem.type().value();
         chunkGenerator = levelStem.generator();
         biomeSource = chunkGenerator.getBiomeSource();
-        previewStorage = new PreviewStorage(renderSettings, yMin(), yMax());
+        previewStorageCacheManager = _previewStorageCacheManager;
         chunkSampler = renderSettings.samplerType.create(renderSettings.quartStride());
         previewData = _previewData;
 
@@ -105,7 +108,7 @@ public class WorkManager {
                         biomeSource,
                         chunkGenerator,
                         _registryAccess,
-                        _worldOptions,
+                        worldOptions,
                         levelStem,
                         levelHeightAccessor,
                         _worldDataConfiguration,
@@ -117,7 +120,7 @@ public class WorkManager {
                         server,
                         biomeSource,
                         chunkGenerator,
-                        _worldOptions,
+                        worldOptions,
                         levelStem,
                         levelHeightAccessor
                 );
@@ -125,6 +128,14 @@ public class WorkManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * MUST be called in the render thread and AFTER {@link #changeWorldGenState} has finished
+     */
+    public void postChangeWorldGenState() {
+        // This call MAY change screens and MUST thus be called in the render thread!
+        previewStorage = previewStorageCacheManager.loadPreviewStorage(worldOptions.seed(), yMin(), yMax());
 
         // Only create the executors at the end to ensure that there are no
         // null pointer exceptions
@@ -164,14 +175,30 @@ public class WorkManager {
     public void cancel() {
         shutdownExecutors();
 
+        final Executor serverThreadPoolExecutor = WorldPreview.get().serverThreadPoolExecutor();
         if (sampleUtils != null) {
             try {
-                sampleUtils.close();
+                if (serverThreadPoolExecutor != null) {
+                    CompletableFuture.runAsync(() -> {
+                        try {
+                            sampleUtils.close();
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, serverThreadPoolExecutor).get();
+                } else {
+                    sampleUtils.close();
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
 
+        if (previewStorageCacheManager != null) {
+            previewStorageCacheManager.storePreviewStorage(worldOptions.seed(), previewStorage);
+        }
+
+        worldOptions = null;
         levelStem = null;
         dimensionType = null;
         chunkGenerator = null;
@@ -184,6 +211,7 @@ public class WorkManager {
         futures.clear();
         executorService = null;
         queueChunksService = null;
+        previewStorageCacheManager = null;
     }
 
     private boolean requeueOnYOnlyChange() {
@@ -312,6 +340,13 @@ public class WorkManager {
                 units += queueForLevel(chunks, y, 4096, this::workUnitFactory);
             }
         }
+
+        /* Compression debug code
+        if (units == 0) {
+            List<Short> x = previewStorage.compressionStatistics();
+            LOGGER.info("Compression statistics: {}", Arrays.toString(x.toArray()));
+        }
+         */
 
         final Instant end = Instant.now();
         LOGGER.info(
