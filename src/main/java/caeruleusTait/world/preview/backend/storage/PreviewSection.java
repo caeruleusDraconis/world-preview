@@ -10,7 +10,7 @@ import java.util.BitSet;
 import java.util.List;
 
 public abstract class PreviewSection implements Serializable {
-    public static final int SHIFT = 7;
+    public static final int SHIFT = 6;
     public static final int SIZE = 1 << SHIFT;
     public static final int OFFSET = 1 << (SHIFT - 1);
     public static final int MASK = -SIZE;

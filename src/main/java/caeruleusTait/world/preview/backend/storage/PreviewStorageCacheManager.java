@@ -31,7 +31,8 @@ public interface PreviewStorageCacheManager {
         flags |= CACHE_FORMAT_VERSION & 0b1111;
         flags |= (settings.samplerType.ordinal() & 0b1111) << 4;
         flags |= (PreviewSection.SHIFT & 0b1111) << 8;
-        flags |= cfg.enableCompression ? 1 << 12 : 0;
+        flags |= (PreviewBlock.PREVIEW_BLOCK_SHIFT & 0b1111) << 12;
+        flags |= cfg.enableCompression ? 1 << 16 : 0;
 
         return String.format("%s-%d-%d", settings.dimension, settings.pixelsPerChunk(), flags);
     }
