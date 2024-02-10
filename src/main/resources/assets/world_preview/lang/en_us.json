@@ -23,6 +23,7 @@
   "world_preview.preview.btn-cycle.SEEDS": "Seeds",
   "world_preview.preview.btn-cycle.structures.disabled.tooltip": "Structure sampling is disabled and can be enabled in the settings",
   "world_preview.preview.error.setup-failed": "§c§lWorld preview setup failed!§r\n\nThis is likely due to an incompatible mod.\nFor more info check our FAQ:\nhttps://github.com/caeruleusDraconis/world-preview/",
+  "world_preview.preview.msg.loading": "§lInitializing preview...§r",
   "world_preview.preview-settings.title": "Preview Settings",
   "world_preview.preview-display.tooltip": "Biome: %s\nBlock: %s\nHeight: %s",
   "world_preview.preview-display.tooltip.controls": "Biome: %s\nBlock: %s\nHeight: %s\n\n§7§oControls:\n - X/Z: Dragging the map\n - Y: Mouse wheel§r",

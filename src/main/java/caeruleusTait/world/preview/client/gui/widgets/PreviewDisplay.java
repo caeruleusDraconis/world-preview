@@ -40,6 +40,7 @@ import java.util.*;
 
 import static caeruleusTait.world.preview.WorldPreview.LOGGER;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.MSG_ERROR_SETUP_FAILED;
+import static caeruleusTait.world.preview.client.WorldPreviewComponents.MSG_PREVIEW_SETUP_LOADING;
 
 public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     private final Minecraft minecraft;
@@ -233,6 +234,10 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                 previewImg.fillRect(0, 0, texWidth, texHeight, 0xFF000000);
                 previewTexture.upload();
                 WorldPreviewClient.renderTexture(previewTexture, xMin, yMin, xMax, yMax);
+
+                final int centerX = getX() + (width / 2);
+                final int centerY = getY() + (height / 2);
+                guiGraphics.drawCenteredString(minecraft.font, MSG_PREVIEW_SETUP_LOADING, centerX, centerY, 0xFFFFFF);
             } else {
                 Arrays.fill(workingVisibleBiomes, (short) 0);
                 Arrays.fill(workingVisibleStructures, (short) 0);

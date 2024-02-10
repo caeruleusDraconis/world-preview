@@ -27,6 +27,7 @@ public class WorldPreviewComponents {
 
     // Error message on setup
     public static final Component MSG_ERROR_SETUP_FAILED = Component.translatable("world_preview.preview.error.setup-failed");
+    public static final Component MSG_PREVIEW_SETUP_LOADING = Component.translatable("world_preview.preview.msg.loading");
 
     // Settings
     public static final Component SETTINGS_TITLE = Component.translatable("world_preview.settings.title");
