@@ -263,7 +263,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                     }
                 }
         );
-        toggleHeightmap.selected = false;
+        toggleHeightmap.selected = renderSettings.showHeightMap && cfg.sampleHeightmap;
         toggleHeightmap.active = false;
         toRender.add(toggleHeightmap);
 
@@ -279,7 +279,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
                     }
                 }
         );
-        toggleIntersections.selected = false;
+        toggleIntersections.selected = renderSettings.showIntersections && cfg.sampleIntersections;
         toggleIntersections.active = false;
         toRender.add(toggleIntersections);
 
