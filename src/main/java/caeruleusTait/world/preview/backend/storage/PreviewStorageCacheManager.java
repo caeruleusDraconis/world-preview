@@ -12,6 +12,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 public interface PreviewStorageCacheManager {
 
     int CACHE_FORMAT_VERSION = 1;
@@ -34,7 +36,11 @@ public interface PreviewStorageCacheManager {
         flags |= (PreviewBlock.PREVIEW_BLOCK_SHIFT & 0b1111) << 12;
         flags |= cfg.enableCompression ? 1 << 16 : 0;
 
-        return String.format("%s-%d-%d", settings.dimension, settings.pixelsPerChunk(), flags);
+        return String.format("%s-%d-%d", settings.dimension, settings.pixelsPerChunk(), flags)
+                .replace(":", "_")
+                .replace(";", "_")
+                .replace("/", "_")
+                .replace("\\", "_");
     }
 
     default void clearCache() {
@@ -46,11 +52,12 @@ public interface PreviewStorageCacheManager {
     }
 
     default void writeCacheFile(PreviewStorage storage, Path outFile) {
+        Path outFileTmp = outFile.getParent().resolve(outFile.getFileName().toString() + ".tmp");
         WorldPreview.LOGGER.info("Writing preview data to {}", outFile);
 
         ZipEntry entry = new ZipEntry("bin");
         try (
-                FileOutputStream fos = new FileOutputStream(outFile.toFile());
+                FileOutputStream fos = new FileOutputStream(outFileTmp.toFile());
                 ZipOutputStream zos = new ZipOutputStream(fos);
         ) {
             zos.putNextEntry(entry);
@@ -59,6 +66,13 @@ public interface PreviewStorageCacheManager {
             zos.closeEntry();
         } catch (IOException e) {
             WorldPreview.LOGGER.error("Failed to write cached preview data to {}", outFile);
+            e.printStackTrace();
+        }
+
+        try {
+            Files.move(outFileTmp, outFile, REPLACE_EXISTING);
+        } catch (IOException e) {
+            WorldPreview.LOGGER.error("Failed to move cached preview data to {} --> {}", outFileTmp, outFile);
             e.printStackTrace();
         }
     }
