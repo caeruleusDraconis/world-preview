@@ -65,6 +65,9 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     private PreviewDisplayDataProvider.StructureRenderInfo[] structureRenderInfoMap;
     private final NativeImage dummyIcon;
 
+    private Component coordinatesCopiedMsg = null;
+    private Instant coordinatesCopiedTime = null;
+
     private int texWidth = 100;
     private int texHeight = 100;
 
@@ -280,6 +283,16 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         guiGraphics.fill(xMax, yMin, xMax+1, yMax, colorBorder); // Down
         guiGraphics.fill(xMin-1, yMax, xMax+1, yMax+1, colorBorder); // Left
         guiGraphics.fill(xMin-1, yMin, xMin, yMax, colorBorder); // Up
+
+        // Render copied message
+        if (coordinatesCopiedMsg != null) {
+            guiGraphics.fill(xMin, yMax - 38, xMax, yMax - 19, 0xAA000000);
+            guiGraphics.drawCenteredString(minecraft.font, coordinatesCopiedMsg, xMin + ((xMax - xMin) / 2), yMax - 32, 0xFFFFFF);
+            if (Duration.between(coordinatesCopiedTime, Instant.now()).toSeconds() >= 8) {
+                coordinatesCopiedMsg = null;
+                coordinatesCopiedTime = null;
+            }
+        }
 
         final Instant renderEnd = Instant.now();
         frametimes.add(Duration.between(renderStart, renderEnd).abs().toMillis());
@@ -766,6 +779,32 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
             }
             return true;
         }
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // Copy TP command to clipboard on right click
+        if (this.clicked(mouseX, mouseY) && button == 1) {
+            this.playDownSound(minecraft.getSoundManager());
+
+            final HoverInfo hoverInfo = hoveredBiome(mouseX, mouseY);
+            if (hoverInfo == null) {
+                return true;
+            }
+            final String coordinates = String.format(
+                    "%s %s %s",
+                    hoverInfo.blockX,
+                    hoverInfo.height == Short.MIN_VALUE ? "~" : hoverInfo.height,
+                    hoverInfo.blockZ
+            );
+
+            minecraft.keyboardHandler.setClipboard(coordinates);
+            coordinatesCopiedTime = Instant.now();
+            coordinatesCopiedMsg = Component.translatable("world_preview.preview-display.coordinates.copied", coordinates);
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     private static int textureColor(int orig) {
