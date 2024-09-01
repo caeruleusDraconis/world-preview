@@ -465,7 +465,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                         }
                         case NOISE_PEAKS_AND_VALLEYS -> {
                             if (rawData > Short.MIN_VALUE) {
-                                final float data = ((float) rawData) / 0.5f / ((float) Short.MAX_VALUE);
+                                final float data = ((float) rawData) / 0.75f / ((float) Short.MAX_VALUE);
                                 final float pvData = NoiseRouterData.peaksAndValleys(Math.min(1.0f, Math.max(-1.0f, data)));
                                 final int idx = Math.min(1023, Math.max(0, 512 + (int) (pvData * 512)));
                                 color = noiseColorMap[idx];
@@ -667,7 +667,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                     Double.NaN,
                     Double.NaN,
                     Double.NaN
-            );
+            );      
         } else {
             return new HoverInfo(
                     xMin + xPos, center.getY(), zMin + zPos, dataProvider.biome4Id(biome), height,
@@ -677,7 +677,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                     erosion / 1.0 / Short.MAX_VALUE,
                     depth / 0.5 / Short.MAX_VALUE,
                     weirdness / 0.75 / Short.MAX_VALUE,
-                    NoiseRouterData.peaksAndValleys(Math.min(1.0f, Math.max(-1.0f, depth / 0.5f / Short.MAX_VALUE)))
+                    NoiseRouterData.peaksAndValleys(Math.min(1.0f, Math.max(-1.0f, weirdness / 0.75f / Short.MAX_VALUE)))
             );
         }
     }
