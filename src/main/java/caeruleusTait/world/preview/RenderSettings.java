@@ -106,7 +106,7 @@ public class RenderSettings {
         NOISE_EROSION(FLAG_NOISE_EROSION, true),
         NOISE_DEPTH(FLAG_NOISE_DEPTH, true),
         NOISE_WEIRDNESS(FLAG_NOISE_WEIRDNESS, true),
-        NOISE_PEAKS_AND_VALLEYS(FLAG_NOISE_DEPTH, true),
+        NOISE_PEAKS_AND_VALLEYS(FLAG_NOISE_WEIRDNESS, true),
 
         ;
 
