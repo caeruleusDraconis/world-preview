@@ -35,7 +35,7 @@ public class FullChunkWorkUnit extends WorkUnit {
         }
     }
 
-    private List<WorkResult> doNormalWork() {
+    private List<WorkResult> doRawNoiseWork() {
         List<WorkResult> results = new ArrayList<>((yMax - yMin) / yStride);
         for (int y = yMin; y <= yMax; y += yStride) {
             WorkResult res             = new WorkResult(this, QuartPos.fromBlock(y), y == this.y ? primarySection : storage.section4(chunkPos, y, flags()),    new ArrayList<>(16), List.of());
@@ -48,12 +48,14 @@ public class FullChunkWorkUnit extends WorkUnit {
             for (BlockPos p : sampler.blocksForChunk(chunkPos, y)) {
                 final var sample = sampleUtils.doSample(p);
                 sampler.expandRaw(p, biomeIdFrom(sample.biome()), res);
-                sampler.expandRaw(p, sample.noiseResult()[0], temperature);
-                sampler.expandRaw(p, sample.noiseResult()[1], humidity);
-                sampler.expandRaw(p, sample.noiseResult()[2], continentalness);
-                sampler.expandRaw(p, sample.noiseResult()[3], erosion);
-                sampler.expandRaw(p, sample.noiseResult()[4], depth);
-                sampler.expandRaw(p, sample.noiseResult()[5], weirdness);
+                if(sample.noiseResult() != null) {
+                    sampler.expandRaw(p, sample.noiseResult()[0], temperature);
+                    sampler.expandRaw(p, sample.noiseResult()[1], humidity);
+                    sampler.expandRaw(p, sample.noiseResult()[2], continentalness);
+                    sampler.expandRaw(p, sample.noiseResult()[3], erosion);
+                    sampler.expandRaw(p, sample.noiseResult()[4], depth);
+                    sampler.expandRaw(p, sample.noiseResult()[5], weirdness);
+                }
             }
             results.add(res);
             results.add(temperature);
@@ -66,7 +68,7 @@ public class FullChunkWorkUnit extends WorkUnit {
         return results;
     }
 
-    private List<WorkResult> doRawNoiseWork() {
+    private List<WorkResult> doNormalWork() {
         List<WorkResult> results = new ArrayList<>(((yMax - yMin) / yStride) * 7);
         for (int y = yMin; y <= yMax; y += yStride) {
             WorkResult res = new WorkResult(
