@@ -70,7 +70,8 @@ This table shows the current support status for the Minecraft version.
 
 | Minecraft Version | Status    |
 |-------------------|-----------|
-| `1.20.x`          | Supported |
+| `1.20.x`          | Bugfixes  |
+| `1.21.x`          | Supported |
 
 ## FAQ
 

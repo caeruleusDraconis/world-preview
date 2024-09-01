@@ -2,6 +2,76 @@
 
 This document contains a list of notable changes for world-preview.
 
+## [1.3.1] - 2024-09-01
+
+Download on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/world-preview) or [Modrinth](https://modrinth.com/mod/world-preview)
+
+### ✨ Features
+
+-  Portuguese translation by [WingFrosty](https://github.com/WingFrosty)
+-  Russian translation update by [mpustovoi](https://github.com/mpustovoi)
+
+
+### 🐛 Bug Fixes
+
+-  Fixed generation when all chunks were sample at once [[#41]](https://github.com/caeruleusDraconis/world-preview/issues/41)
+-  Fixed the calculation for the Peaks and Valley noise value to use weirdness instead of depth [[#42]](https://github.com/caeruleusDraconis/world-preview/issues/42)
+
+
+## [1.3.0] - 2024-04-01
+
+Download on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/world-preview) or [Modrinth](https://modrinth.com/mod/world-preview)
+
+### ✨ Features
+
+-  Added noise view
+
+
+## [1.2.2] - 2024-04-01
+
+Download on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/world-preview) or [Modrinth](https://modrinth.com/mod/world-preview)
+
+### ✨ Features
+
+-  Right click on preview copies coordinates
+
+
+### 🐛 Bug Fixes
+
+-  Add fallback to World Loading [[#29]](https://github.com/caeruleusDraconis/world-preview/issues/29)
+
+
+## [1.2.1] - 2024-02-14
+
+### 🐛 Bug Fixes
+
+-  Replace forbidden characters in the cache filename [[#25]](https://github.com/caeruleusDraconis/world-preview/issues/25)
+
+-  Correctly set initial state of the toggle buttons
+
+
+## [1.2.0] - 2024-02-10
+
+### ✨ Features
+
+-  Preview caching (https://github.com/caeruleusDraconis/world-preview/issues/23)
+
+-  Preview-data compression to reduce RAM usage
+
+-  Render preview initializing message
+
+
+### 🐛 Bug Fixes
+
+-  Black icons on resize
+
+-  Fix possible nullpointer exception
+
+-  Mod compatibility issue with spark
+
+-  Work around some more Forge server thread detection
+
+
 ## [1.1.6] - 2024-01-01
 
 ### 🐛 Bug Fixes
