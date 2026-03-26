@@ -53,7 +53,7 @@ public class HeightmapWorkUnit extends WorkUnit {
         final int minY = config.onlySampleInVisualRange ? config.heightmapMinY : noiseSettings.minY();
         final int maxY = config.onlySampleInVisualRange ? config.heightmapMaxY : minY + noiseSettings.height();
         final int cellMinY = Mth.floorDiv(minY, noiseSettings.getCellHeight());
-        final int cellCountY = Mth.floorDiv(maxY - minY, noiseSettings.getCellHeight());
+        final int cellCountY = -Mth.floorDiv(minY - maxY, noiseSettings.getCellHeight());
         final int cellOffsetY = config.onlySampleInVisualRange ? cellMinY -  Mth.floorDiv(noiseSettings.minY(), noiseSettings.getCellHeight()): 0;
 
         final int minBlockX = chunkPos.getMinBlockX();
@@ -91,6 +91,7 @@ public class HeightmapWorkUnit extends WorkUnit {
                         // Iterate over block in cell Y X Z
                         for (int yInCell = cellHeight - 1; yInCell >= 0 && !positions.isEmpty(); --yInCell) {
                             final int y = (cellMinY + cellY) * cellHeight + yInCell;
+                            if (y >= maxY) continue;
                             noiseChunk.updateForY(y, (double) yInCell / (double) cellHeight);
 
                             for (int idx = 0; idx < positions.size(); ++idx) {
