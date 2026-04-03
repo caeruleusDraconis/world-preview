@@ -6,7 +6,7 @@ FILES=(
   'c|settings.gradle'
   'c|src/main/java/caeruleusTait/world/preview/WorldPreview.java'
   'c|src/main/java/caeruleusTait/world/preview/client/WorldPreviewClient.java'
-  'o|src/main/resources/META-INF/mods.toml'
+  'o|src/main/resources/META-INF/neoforge.mods.toml'
   'o|src/main/resources/fabric.mod.json'
   'o|src/main/resources/pack.mcmeta'
 )
@@ -22,7 +22,7 @@ cat << EOF
   Please select the desired Minecraft Mod loader:
 
     1: Fabric
-    2: Forge
+    2: NeoForge
 
 EOF
 
@@ -35,8 +35,8 @@ case $LOADER in
     ENDING='fabric'
     ;;
   2)
-    echo -n "Switching to Forge"
-    ENDING='forge'
+    echo -n "Switching to NeoForge"
+    ENDING='neoforge'
     ;;
   *)
     echo "Invalid selection: $LOADER"

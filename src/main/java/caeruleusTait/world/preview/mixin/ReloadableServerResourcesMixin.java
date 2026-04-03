@@ -9,7 +9,6 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.List;
 public abstract class ReloadableServerResourcesMixin {
 
     @Inject(method = "listeners", at = @At("RETURN"), cancellable = true)
-    private void modifyReloadList(CallbackInfoReturnable<List<PreparableReloadListener>> cir) {
+    private void addMyListener(CallbackInfoReturnable<List<PreparableReloadListener>> cir) {
         List<PreparableReloadListener> listeners = new ArrayList<>(cir.getReturnValue());
         listeners.add(new BiomeColorMapReloadListener());
         listeners.add(new StructureMapReloadListener());

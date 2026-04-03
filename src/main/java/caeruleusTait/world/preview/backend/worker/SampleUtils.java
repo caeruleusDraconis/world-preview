@@ -4,7 +4,6 @@ import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.WorldPreviewConfig;
 import caeruleusTait.world.preview.backend.storage.PreviewLevel;
 import caeruleusTait.world.preview.backend.stubs.DummyMinecraftServer;
-import caeruleusTait.world.preview.backend.stubs.DummyServerLevelData;
 import caeruleusTait.world.preview.backend.stubs.EmptyAquifer;
 import caeruleusTait.world.preview.mixin.MinecraftServerAccessor;
 import caeruleusTait.world.preview.mixin.NoiseBasedChunkGeneratorAccessor;
@@ -38,8 +37,8 @@ import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.blending.Blender;
@@ -65,8 +64,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
@@ -92,7 +89,6 @@ public class SampleUtils implements AutoCloseable {
     private final ResourceKey<Level> dimension;
     private final NoiseGeneratorSettings noiseGeneratorSettings;
     private final MinecraftServer minecraftServer;
-    private final ServerLevel serverLevel;
     private final WorldPreviewConfig cfg;
 
     /**
@@ -165,7 +161,6 @@ public class SampleUtils implements AutoCloseable {
         } else {
             noiseGeneratorSettings = null;
         }
-        serverLevel = null;
     }
 
     /**
@@ -181,7 +176,7 @@ public class SampleUtils implements AutoCloseable {
             WorldDataConfiguration worldDataConfiguration,
             Proxy proxy,
             @Nullable Path tempDataPackDir
-    ) throws IOException, RuntimeException {
+    ) throws IOException {
         this.cfg = WorldPreview.get().cfg();
         try {
             tempDir = Files.createTempDirectory("world_preview");
@@ -243,45 +238,18 @@ public class SampleUtils implements AutoCloseable {
         dimension = Registries.levelStemToLevel(levelStemResourceKey);
 
         // Some mods listen on the <init> of MinecraftServer
-        final int functionCompilationLevel = 0;
-        final Executor executor = Executors.newSingleThreadExecutor();
-        final LevelSettings levelSettings = new LevelSettings("temp", GameType.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(), worldDataConfiguration);
-        final PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, worldOptions, PrimaryLevelData.SpecialWorldProperty.NONE, Lifecycle.stable());
-        final var future = ReloadableServerResources.loadResources(resourceManager, layeredRegistryAccess, worldDataConfiguration.enabledFeatures(), Commands.CommandSelection.DEDICATED, functionCompilationLevel, executor, executor);
-        final ReloadableServerResources reloadableServerResources;
-        try {
-            reloadableServerResources = future.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-        // Pre 1.20.5 version:
-        // ReloadableServerResources reloadableServerResources = new ReloadableServerResources(layeredRegistryAccess.compositeAccess(), FeatureFlagSet.of(), Commands.CommandSelection.ALL, 0);
+        LevelSettings levelSettings = new LevelSettings("temp", GameType.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(), worldDataConfiguration);
+        PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, worldOptions, PrimaryLevelData.SpecialWorldProperty.NONE, Lifecycle.stable());
+        ReloadableServerResources reloadableServerResources = ReloadableServerResources.loadResources(
+                resourceManager,
+                layeredRegistryAccess,
+                FeatureFlagSet.of(),
+                Commands.CommandSelection.ALL,
+                0,
+                Runnable::run,
+                Runnable::run
+        ).join();
         WorldStem worldStem = new WorldStem(resourceManager, reloadableServerResources, layeredRegistryAccess, primaryLevelData);
-
-        final ChunkProgressListener chunkProgressListener = new ChunkProgressListener() {
-            @Override
-            public void updateSpawnPos(ChunkPos center) {
-
-            }
-
-            @Override
-            public void onStatusChange(ChunkPos chunkPosition, @Nullable ChunkStatus newStatus) {
-
-            }
-
-            @Override
-            public void start() {
-
-            }
-
-            @Override
-            public void stop() {
-
-            }
-        };
 
         minecraftServer = new DummyMinecraftServer(
                 new Thread(() -> {}), // Dummy thread is required for the spark mod
@@ -291,7 +259,26 @@ public class SampleUtils implements AutoCloseable {
                 proxy,
                 dataFixer,
                 new Services(null, null, null, null),
-                i -> chunkProgressListener
+                i -> new ChunkProgressListener() {
+                    @Override
+                    public void updateSpawnPos(ChunkPos center) {
+                    }
+
+                    @Override
+                    public void onStatusChange(
+                            ChunkPos chunkPosition,
+                            @Nullable ChunkStatus newStatus
+                    ) {
+                    }
+
+                    @Override
+                    public void start() {
+                    }
+
+                    @Override
+                    public void stop() {
+                    }
+                }
         );
 
         // All this stuff, just so we can give Forge a fake minecraft server...
@@ -362,7 +349,6 @@ public class SampleUtils implements AutoCloseable {
                 dataFixer
         );
         this.structureManager = new StructureManager(this.previewLevel, worldOptions, this.structureCheck);
-
         this.chunkGeneratorStructureState = this.chunkGenerator.createState(
                 this.registryAccess.lookupOrThrow(Registries.STRUCTURE_SET),
                 this.randomState,
@@ -371,22 +357,6 @@ public class SampleUtils implements AutoCloseable {
 
         // Initialize early
         chunkGeneratorStructureState.ensureStructuresGenerated();
-
-        // Create fake , to trigger mixins for some mods...
-        serverLevel = new ServerLevel(
-                minecraftServer,
-                Executors.newSingleThreadExecutor(),
-                levelStorageAccess,
-                new DummyServerLevelData(),
-                dimension,
-                levelStem,
-                chunkProgressListener,
-                false, // is Debug
-                BiomeManager.obfuscateSeed(worldOptions.seed()),
-                List.of(),
-                false,
-                null
-            );
     }
 
     public @Nullable ServerPlayer getPlayers(UUID playerId) {
@@ -505,9 +475,6 @@ public class SampleUtils implements AutoCloseable {
     @Override
     public void close() throws Exception {
         // FileUtils.deleteDirectory(tempDir.toFile());
-        if (serverLevel != null) {
-            serverLevel.close();
-        }
         if (minecraftServer instanceof DummyMinecraftServer) {
             WorldPreview.get().loaderSpecificTeardown(minecraftServer);
         }

@@ -17,6 +17,20 @@ import java.net.Proxy;
 import java.util.UUID;
 
 public class DummyMinecraftServer extends MinecraftServer {
+    private static final SampleLogger NOOP_SAMPLE_LOGGER = new SampleLogger() {
+        @Override
+        public void logFullSample(long[] values) {
+        }
+
+        @Override
+        public void logSample(long value) {
+        }
+
+        @Override
+        public void logPartialSample(long value, int dimension) {
+        }
+    };
+
     public DummyMinecraftServer(
             Thread thread,
             LevelStorageSource.LevelStorageAccess levelStorageAccess,
@@ -50,28 +64,6 @@ public class DummyMinecraftServer extends MinecraftServer {
 
     @Override
     public boolean shouldRconBroadcast() {
-        return false;
-    }
-
-    @Override
-    protected SampleLogger getTickTimeLogger() {
-        return new SampleLogger() {
-            @Override
-            public void logFullSample(long[] ls) {
-            }
-
-            @Override
-            public void logSample(long l) {
-            }
-
-            @Override
-            public void logPartialSample(long l, int i) {
-            }
-        };
-    }
-
-    @Override
-    public boolean isTickTimeLoggingEnabled() {
         return false;
     }
 
@@ -112,6 +104,16 @@ public class DummyMinecraftServer extends MinecraftServer {
 
     @Override
     public boolean isSingleplayerOwner(@NotNull GameProfile profile) {
+        return false;
+    }
+
+    @Override
+    protected SampleLogger getTickTimeLogger() {
+        return NOOP_SAMPLE_LOGGER;
+    }
+
+    @Override
+    public boolean isTickTimeLoggingEnabled() {
         return false;
     }
 }

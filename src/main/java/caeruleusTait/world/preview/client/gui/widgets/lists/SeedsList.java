@@ -1,18 +1,17 @@
 package caeruleusTait.world.preview.client.gui.widgets.lists;
 
 import caeruleusTait.world.preview.client.gui.screens.PreviewContainer;
-import caeruleusTait.world.preview.client.gui.widgets.OldStyleImageButton;
+import caeruleusTait.world.preview.client.gui.widgets.SpriteSheetButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
-import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEXTURE;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEX_HEIGHT;
-import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.BUTTONS_TEX_WIDTH;
+import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.*;
 
 public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
     private final PreviewContainer previewContainer;
@@ -36,7 +35,7 @@ public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
         public SeedEntry(SeedsList seedsList, String seed) {
             this.seedsList = seedsList;
             this.seed = seed;
-            this.deleteButton = new OldStyleImageButton(
+            this.deleteButton = new SpriteSheetButton(
                     0, 0, 20, 20, /* x, y, width, height */
                     40, 20, 20, /* xTexStart, yTexStart, yDiffTex */
                     BUTTONS_TEXTURE, BUTTONS_TEX_WIDTH, BUTTONS_TEX_HEIGHT, /* resourceLocation, textureWidth, textureHeight*/

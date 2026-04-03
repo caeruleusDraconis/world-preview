@@ -144,7 +144,7 @@ public class PreviewLevel implements WorldGenLevel {
     }
 
     @Override
-    public void gameEvent(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context) {
+    public void gameEvent(Holder<GameEvent> event, Vec3 position, GameEvent.Context context) {
         throw new NotImplementedException("Not implemented");
     }
 
