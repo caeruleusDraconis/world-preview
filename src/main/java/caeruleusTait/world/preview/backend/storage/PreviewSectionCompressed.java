@@ -8,7 +8,7 @@ import java.util.List;
 
 public abstract class PreviewSectionCompressed extends PreviewSection {
     @Serial
-    private static final long serialVersionUID = 6458820535476205432L;
+    private static final long serialVersionUID = 6458820535476205433L;
 
     private final int size;
 
