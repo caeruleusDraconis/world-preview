@@ -99,11 +99,7 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
         final int idx = xzToIdx(x, z);
         // Read the volatile state once to get a consistent (data, mapData) pair.
         final CompressedState snap = state;
-        try {
-            return getReal(idx, snap.data, snap.mapData);
-        } catch (IndexOutOfBoundsException e) {
-            return Short.MIN_VALUE;
-        }
+        return getReal(idx, snap.data, snap.mapData);
     }
 
     private static short getReal(int idx, short[] data, short[] mapData) {
