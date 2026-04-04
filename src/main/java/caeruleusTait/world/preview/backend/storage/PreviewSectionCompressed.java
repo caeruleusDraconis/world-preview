@@ -17,14 +17,6 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
     private short[] mapData = new short[0];
 
     /**
-     * Number of entries actually in use in {@link #mapData}.
-     *
-     * <p>For single-value mode ({@code mapData.length == 0}) and no-compression
-     * mode ({@code mapData.length == 1}) this field is unused and should be 0.
-     */
-    private short mapDataCount = 0;
-
-    /**
      * Holds the data and mapData arrays together so that unsynchronized readers
      * always see a consistent pair. The field is volatile so that a single read
      * in {@link #get} obtains both arrays from the same compression generation.
@@ -195,21 +187,17 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
         final CompressedState s = state;
 
         // Check cache
-        if (lastIdx < mapDataCount && s.mapData[lastIdx] == value) {
+        if (s.mapData[lastIdx] == value) {
             return lastIdx;
         }
 
-        // Find in existing map
-        for (short i = 0; i < mapDataCount; ++i) {
+        for (short i = 0; i < s.mapData.length; ++i) {
             if (value == s.mapData[i]) {
                 return lastIdx = i;
+            } else if (s.mapData[i] == Short.MIN_VALUE) {
+                s.mapData[i] = value;
+                return lastIdx = i;
             }
-        }
-
-        // Insert if there is room
-        if (mapDataCount < s.mapData.length) {
-            s.mapData[mapDataCount] = value;
-            return lastIdx = mapDataCount++;
         }
 
         // We need to grow the array (expensive)
@@ -218,8 +206,8 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
             case 4 -> {
                 // Grow mapData
                 short[] newMapData = Arrays.copyOf(s.mapData, 16);
-                newMapData[mapDataCount] = value;
-                mapDataCount++;
+                newMapData[4] = value;
+                Arrays.fill(newMapData, 5, 16, Short.MIN_VALUE);
 
                 // Grow data
                 short[] newData = new short[s.data.length * 2];
@@ -233,15 +221,15 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
                 data = newData;
                 mapData = newMapData;
                 state = new CompressedState(newData, newMapData);
-                yield (short) (mapDataCount - 1);
+                yield 4;
             }
 
             // Grow second level compression to third level compression
             case 16 -> {
                 // Grow mapData
                 short[] newMapData = Arrays.copyOf(s.mapData, 256);
-                newMapData[mapDataCount] = value;
-                mapDataCount++;
+                newMapData[16] = value;
+                Arrays.fill(newMapData, 17, 256, Short.MIN_VALUE);
 
                 // Grow data
                 short[] newData = new short[s.data.length * 2];
@@ -254,7 +242,7 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
                 data = newData;
                 mapData = newMapData;
                 state = new CompressedState(newData, newMapData);
-                yield (short) (mapDataCount - 1);
+                yield 16;
             }
 
             // Fully expand third level to no compression
@@ -267,15 +255,12 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
                     newData[i * 2 + 1] = s.mapData[((sv >> 8) & 0b11111111)];
                 }
 
-                short[] newMapData = new short[1]; // There is no cache (magic array length 1)
-                mapDataCount = 0;
-
-                // Publish atomically
+                // Publish atomically: no more compression --> no map --> no index, just the raw value
+                short[] newMapData = new short[1];
                 data = newData;
                 mapData = newMapData;
                 state = new CompressedState(newData, newMapData);
 
-                // No more compression --> no map --> no index, just the raw value
                 yield value;
             }
             default -> throw new IllegalStateException("Unexpected value: " + s.mapData.length);
@@ -289,15 +274,14 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
             // Handle single value for entire section
 
             if (s.data[0] == biome) {
-                // Nothing to do — either both are Short.MIN_VALUE (unsampled → unsampled)
-                // or both are a real value V (same value → no change needed).
+                // Nothing to do
+            } else if (s.data[0] == Short.MIN_VALUE) {
+                s.data[0] = biome;
             } else {
-                // Different value → expand to first level compression
+                // new value --> expand to first level compression
                 short[] newData = new short[(size * size) >> 3];
-                short[] newMapData = new short[4];
-                newMapData[0] = s.data[0];
-                newMapData[1] = biome;
-                mapDataCount = 2;
+                Arrays.fill(newData, (short) 0);
+                short[] newMapData = new short[]{s.data[0], biome, Short.MIN_VALUE, Short.MIN_VALUE};
                 // Publish both arrays atomically via the volatile state field
                 data = newData;
                 mapData = newMapData;
@@ -339,6 +323,13 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
     }
 
     public synchronized short mapSize() {
-        return mapDataCount;
+        final CompressedState s = state;
+        short sv;
+        for (sv = 0; sv < s.mapData.length; sv++) {
+            if (s.mapData[sv] == Short.MIN_VALUE) {
+                return sv;
+            }
+        }
+        return sv;
     }
 }
