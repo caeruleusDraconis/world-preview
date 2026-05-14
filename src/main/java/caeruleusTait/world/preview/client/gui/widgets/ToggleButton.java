@@ -1,10 +1,11 @@
 package caeruleusTait.world.preview.client.gui.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class ToggleButton extends OldStyleImageButton {
+public class ToggleButton extends SpriteSheetButton {
     public boolean selected;
     protected final int xDiff;
 
@@ -14,6 +15,10 @@ public class ToggleButton extends OldStyleImageButton {
 
     public ToggleButton(int x, int y, int width, int height, int xTexStart, int yTexStart, int xDiff, int yDiff, ResourceLocation resourceLocation, OnPress onPress) {
         this(x, y, width, height, xTexStart, yTexStart, xDiff, yDiff, resourceLocation, 256, 256, onPress);
+    }
+
+    public ToggleButton(int x, int y, int width, int height, int xTexStart, int yTexStart, int xDiff, int yDiff, ResourceLocation resourceLocation, int texWidth, int texHeight, OnPress onPress) {
+        this(x, y, width, height, xTexStart, yTexStart, xDiff, yDiff, resourceLocation, texWidth, texHeight, onPress, CommonComponents.EMPTY);
     }
 
     public ToggleButton(
@@ -28,9 +33,10 @@ public class ToggleButton extends OldStyleImageButton {
             ResourceLocation resourceLocation,
             int texWidth,
             int texHeight,
-            OnPress onPress
+            OnPress onPress,
+            Component component
     ) {
-        super(x, y, width, height, xTexStart, yTexStart, yDiff, resourceLocation, texWidth, texHeight, onPress);
+        super(x, y, width, height, xTexStart, yTexStart, yDiff, resourceLocation, texWidth, texHeight, onPress, component);
         this.xDiff = xDiff;
     }
 
@@ -47,10 +53,7 @@ public class ToggleButton extends OldStyleImageButton {
             y += yDiffTex;
         }
 
-        guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
-        guiGraphics.blit(texture, getX(), getY(), x, y, width, height, texWidth, texHeight);
+        guiGraphics.blit(resourceLocation, getX(), getY(), x, y, width, height, textureWidth, textureHeight);
     }
 
     @Override

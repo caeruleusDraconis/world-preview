@@ -8,7 +8,7 @@ import java.util.List;
 
 public abstract class PreviewSectionCompressed extends PreviewSection {
     @Serial
-    private static final long serialVersionUID = 6458820535476205432L;
+    private static final long serialVersionUID = 6458820535476205433L;
 
     private final int size;
 
@@ -16,12 +16,32 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
 
     private short[] mapData = new short[0];
 
+    /**
+     * Holds the data and mapData arrays together so that unsynchronized readers
+     * always see a consistent pair. The field is volatile so that a single read
+     * in {@link #get} obtains both arrays from the same compression generation.
+     *
+     * <p>Transient because the canonical data lives in {@link #data}/{@link #mapData}
+     * which are serialized normally. Reconstructed in {@link #readObject} and the
+     * constructor.
+     */
+    private transient volatile CompressedState state;
+
     private transient short lastIdx = 0;
+
+    private record CompressedState(short[] data, short[] mapData) {}
 
     public PreviewSectionCompressed(int quartX, int quartZ, int size) {
         super(quartX, quartZ);
         this.size = size;
         data[0] = Short.MIN_VALUE;
+        state = new CompressedState(data, mapData);
+    }
+
+    @Serial
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        state = new CompressedState(data, mapData);
     }
 
     //   ________  _________ _
@@ -77,19 +97,12 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
 
     public short get(int x, int z) {
         final int idx = xzToIdx(x, z);
-        // Using synchronized is expensive. Solution: Only require eventual correctness for
-        // reading and write the compression change in such a way to decrease the risk of
-        // IndexOutOfBoundsException as much as possible.
-        //
-        // If still something goes wrong, catch the IndexOutOfBoundsException and return MIN_VALUE.
-        try {
-            return getReal(idx);
-        } catch (IndexOutOfBoundsException e) {
-            return Short.MIN_VALUE;
-        }
+        // Read the volatile state once to get a consistent (data, mapData) pair.
+        final CompressedState snap = state;
+        return getReal(idx, snap.data, snap.mapData);
     }
 
-    private short getReal(int idx) {
+    private static short getReal(int idx, short[] data, short[] mapData) {
         return switch (mapData.length) {
             // The entire section only contains one single value
             case 0 -> data[0];
@@ -123,20 +136,21 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
 
 
     private void internalSetData(int x, int z, short value) {
+        final CompressedState s = state;
         final int idx = xzToIdx(x, z);
-        switch (mapData.length) {
+        switch (s.mapData.length) {
             // The entire section only contains one single value
-            case 0 -> data[0] = value;
+            case 0 -> s.data[0] = value;
 
             // There is no cache (magic array length 1)
-            case 1 -> data[idx] = value;
+            case 1 -> s.data[idx] = value;
 
             // First compression level (oct - 4 unique values | 2 bit per value)
             case 4 -> {
                 final int didx = idx >> 3;
                 final int shift = (idx & 0b111) << 1;
                 final int mask = ~(0b11 << shift);
-                data[didx] = (short) ((data[didx] & mask) | (value & 0b11) << shift);
+                s.data[didx] = (short) ((s.data[didx] & mask) | (value & 0b11) << shift);
             }
 
             // Second compression level (quart - 16 unique values | 4 bit per value)
@@ -144,7 +158,7 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
                 final int didx = idx >> 2;
                 final int shift = (idx & 0b11) << 2;
                 final int mask = ~(0b1111 << shift);
-                data[didx] = (short) ((data[didx] & mask) | (value & 0b1111) << shift);
+                s.data[didx] = (short) ((s.data[didx] & mask) | (value & 0b1111) << shift);
             }
 
             // Third compression level (quart - 256 unique values | 8 bit per value)
@@ -152,119 +166,128 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
                 final int didx = idx >> 1;
                 final int shift = (idx & 0b1) << 3;
                 final int mask = ~(0b11111111 << shift);
-                data[didx] = (short) ((data[didx] & mask) | (value & 0b11111111) << shift);
+                s.data[didx] = (short) ((s.data[didx] & mask) | (value & 0b11111111) << shift);
             }
-            default -> throw new IllegalStateException("Unexpected value: " + mapData.length);
+            default -> throw new IllegalStateException("Unexpected value: " + s.mapData.length);
         }
     }
 
     /**
-     * Calculates the {@link #mapData} index for a specific value. If the value
-     * is not already present, the new value is appended to the map
+     * Calculates the map index for a specific value. If the value
+     * is not already present, the new value is appended to the map.
      * <p>
-     * If the {@link #mapData} is already full, the compression will be migrated
+     * If the map is already full, the compression will be migrated
      * to the next level.
      */
     private short cacheMapIdx(short value) {
+        final CompressedState s = state;
+
         // Check cache
-        if (mapData[lastIdx] == value) {
+        if (s.mapData[lastIdx] == value) {
             return lastIdx;
         }
 
-        // Find or insert in existing map
-        for (short i = 0; i < mapData.length; ++i) {
-            if (value == mapData[i]) {
+        for (short i = 0; i < s.mapData.length; ++i) {
+            if (value == s.mapData[i]) {
                 return lastIdx = i;
-            } else if (mapData[i] == Short.MIN_VALUE) {
-                mapData[i] = value;
+            } else if (s.mapData[i] == Short.MIN_VALUE) {
+                s.mapData[i] = value;
                 return lastIdx = i;
             }
         }
 
         // We need to grow the array (expensive)
-        return switch (mapData.length) {
+        return switch (s.mapData.length) {
             // Grow first level compression to second level compression
             case 4 -> {
                 // Grow mapData
-                short[] newMapData = Arrays.copyOf(mapData, 16);
+                short[] newMapData = Arrays.copyOf(s.mapData, 16);
                 newMapData[4] = value;
                 Arrays.fill(newMapData, 5, 16, Short.MIN_VALUE);
 
                 // Grow data
-                short[] newData = new short[data.length * 2];
-                for (int i = 0; i < data.length; ++i) {
-                    final short s = data[i];
-                    newData[i * 2 + 0] = (short) ((((s >> 0) & 0b11) << 0) | (((s >>  2) & 0b11) << 4) | (((s >>  4) & 0b11) << 8) | (((s >>  6) & 0b11) << 12));
-                    newData[i * 2 + 1] = (short) ((((s >> 8) & 0b11) << 0) | (((s >> 10) & 0b11) << 4) | (((s >> 12) & 0b11) << 8) | (((s >> 14) & 0b11) << 12));
+                short[] newData = new short[s.data.length * 2];
+                for (int i = 0; i < s.data.length; ++i) {
+                    final short sv = s.data[i];
+                    newData[i * 2 + 0] = (short) ((((sv >> 0) & 0b11) << 0) | (((sv >>  2) & 0b11) << 4) | (((sv >>  4) & 0b11) << 8) | (((sv >>  6) & 0b11) << 12));
+                    newData[i * 2 + 1] = (short) ((((sv >> 8) & 0b11) << 0) | (((sv >> 10) & 0b11) << 4) | (((sv >> 12) & 0b11) << 8) | (((sv >> 14) & 0b11) << 12));
                 }
 
-                // Make the change as "atomic" as possible to reduce the risk of `IndexOutOfBoundsException`s
-                mapData = newMapData;
+                // Publish both arrays atomically via the volatile state field
                 data = newData;
+                mapData = newMapData;
+                state = new CompressedState(newData, newMapData);
                 yield 4;
             }
 
             // Grow second level compression to third level compression
             case 16 -> {
                 // Grow mapData
-                short[] newMapData = Arrays.copyOf(mapData, 256);
+                short[] newMapData = Arrays.copyOf(s.mapData, 256);
                 newMapData[16] = value;
                 Arrays.fill(newMapData, 17, 256, Short.MIN_VALUE);
 
                 // Grow data
-                short[] newData = new short[data.length * 2];
-                for (int i = 0; i < data.length; ++i) {
-                    final short s = data[i];
-                    newData[i * 2 + 0] = (short) ((((s >> 0) & 0b1111) << 0) | (((s >>  4) & 0b1111) << 8));
-                    newData[i * 2 + 1] = (short) ((((s >> 8) & 0b1111) << 0) | (((s >> 12) & 0b1111) << 8));
+                short[] newData = new short[s.data.length * 2];
+                for (int i = 0; i < s.data.length; ++i) {
+                    final short sv = s.data[i];
+                    newData[i * 2 + 0] = (short) ((((sv >> 0) & 0b1111) << 0) | (((sv >>  4) & 0b1111) << 8));
+                    newData[i * 2 + 1] = (short) ((((sv >> 8) & 0b1111) << 0) | (((sv >> 12) & 0b1111) << 8));
                 }
-                // Make the change as "atomic" as possible to reduce the risk of `IndexOutOfBoundsException`s
-                mapData = newMapData;
+                // Publish both arrays atomically via the volatile state field
                 data = newData;
+                mapData = newMapData;
+                state = new CompressedState(newData, newMapData);
                 yield 16;
             }
 
             // Fully expand third level to no compression
             case 256 -> {
                 // Grow data
-                short[] newData = new short[data.length * 2];
-                for (int i = 0; i < data.length; ++i) {
-                    final short s = data[i];
-                    newData[i * 2 + 0] = mapData[((s >> 0) & 0b11111111)];
-                    newData[i * 2 + 1] = mapData[((s >> 8) & 0b11111111)];
+                short[] newData = new short[s.data.length * 2];
+                for (int i = 0; i < s.data.length; ++i) {
+                    final short sv = s.data[i];
+                    newData[i * 2 + 0] = s.mapData[((sv >> 0) & 0b11111111)];
+                    newData[i * 2 + 1] = s.mapData[((sv >> 8) & 0b11111111)];
                 }
 
-                mapData = new short[1]; // There is no cache (magic array length 1)
+                // Publish atomically: no more compression --> no map --> no index, just the raw value
+                short[] newMapData = new short[1];
                 data = newData;
+                mapData = newMapData;
+                state = new CompressedState(newData, newMapData);
 
-                // No more compression --> no map --> no index, just the raw value
                 yield value;
             }
-            default -> throw new IllegalStateException("Unexpected value: " + mapData.length);
+            default -> throw new IllegalStateException("Unexpected value: " + s.mapData.length);
         };
     }
 
 
     public synchronized void set(int x, int z, short biome) {
-        if (mapData.length == 0) {
+        final CompressedState s = state;
+        if (s.mapData.length == 0) {
             // Handle single value for entire section
 
-            if (data[0] == biome) {
+            if (s.data[0] == biome) {
                 // Nothing to do
-            } else if (data[0] == Short.MIN_VALUE) {
-                data[0] = biome;
+            } else if (s.data[0] == Short.MIN_VALUE) {
+                s.data[0] = biome;
             } else {
                 // new value --> expand to first level compression
                 short[] newData = new short[(size * size) >> 3];
                 Arrays.fill(newData, (short) 0);
-                mapData = new short[]{data[0], biome, Short.MIN_VALUE, Short.MIN_VALUE};
+                short[] newMapData = new short[]{s.data[0], biome, Short.MIN_VALUE, Short.MIN_VALUE};
+                // Publish both arrays atomically via the volatile state field
                 data = newData;
+                mapData = newMapData;
+                state = new CompressedState(newData, newMapData);
                 internalSetData(x, z, (short) 1);
             }
-        } else if(mapData.length == 1) {
+        } else if(s.mapData.length == 1) {
             // Handle no compression
 
-            data[xzToIdx(x, z)] = biome;
+            s.data[xzToIdx(x, z)] = biome;
         } else {
             // Some level of compression
 
@@ -296,14 +319,13 @@ public abstract class PreviewSectionCompressed extends PreviewSection {
     }
 
     public synchronized short mapSize() {
-        short s;
-
-        for (s = 0; s < mapData.length; s++) {
-            if (mapData[s] == Short.MIN_VALUE) {
-                return s;
+        final CompressedState s = state;
+        short sv;
+        for (sv = 0; sv < s.mapData.length; sv++) {
+            if (s.mapData[sv] == Short.MIN_VALUE) {
+                return sv;
             }
         }
-
-        return s;
+        return sv;
     }
 }

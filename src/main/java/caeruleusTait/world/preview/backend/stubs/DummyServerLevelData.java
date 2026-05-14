@@ -134,6 +134,22 @@ public class DummyServerLevelData implements ServerLevelData {
 
     }
 
+    public void setDayTimePerTick(float dayTimePerTick) {
+
+    }
+
+    public void setDayTimeFraction(float dayTimeFraction) {
+
+    }
+
+    public float getDayTimePerTick() {
+        return 0;
+    }
+
+    public float getDayTimeFraction() {
+        return 0;
+    }
+
     @Override
     public BlockPos getSpawnPos() {
         return BlockPos.ZERO;

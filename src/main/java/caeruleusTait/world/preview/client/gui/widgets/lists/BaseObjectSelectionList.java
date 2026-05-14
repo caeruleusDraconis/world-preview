@@ -9,18 +9,38 @@ import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPosition
 import java.util.Collection;
 
 public abstract class BaseObjectSelectionList<E extends BaseObjectSelectionList.Entry<E>> extends ObjectSelectionList<E> {
-    protected BaseObjectSelectionList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight) {
+    private boolean renderBackground = true;
+    private boolean renderTopAndBottom = true;
+
+    public BaseObjectSelectionList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight) {
         super(minecraft, width, height, y, itemHeight);
+        setLeftPos(x);
+    }
+
+    public void setHeight(int height) {
+        super.setHeight(height);
+    }
+
+    public void setWidth(int width) {
+        super.setWidth(width);
+    }
+
+    public void setTopPos(int top) {
+        setY(top);
+    }
+
+    public void setLeftPos(int x0) {
+        setX(x0);
     }
 
     @Override
     public int getRowLeft() {
-        return getX();
+        return this.getX();
     }
 
     @Override
     public int getRowRight() {
-        return getX() + width - 6;
+        return this.getRight() - 6;
     }
 
     @Override
@@ -30,7 +50,7 @@ public abstract class BaseObjectSelectionList<E extends BaseObjectSelectionList.
 
     @Override
     protected int getScrollbarPosition() {
-        return getRowRight();
+        return this.getRight() - 6;
     }
 
     @Override
@@ -43,11 +63,34 @@ public abstract class BaseObjectSelectionList<E extends BaseObjectSelectionList.
 
     @Override
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        if (this.isMouseOver(mouseX, mouseY)) {
+            E e = getEntryAtPosition(mouseX, mouseY);
+            if (e != null && e.tooltip() != null && minecraft.screen != null) {
+                minecraft.screen.setTooltipForNextRenderPass(e.tooltip(), DefaultTooltipPositioner.INSTANCE, this.isFocused());
+            }
+        }
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
+    }
 
-        E hovered = getHovered();
-        if (hovered != null && hovered.tooltip() != null && minecraft.screen != null) {
-            minecraft.screen.setTooltipForNextRenderPass(hovered.tooltip(), DefaultTooltipPositioner.INSTANCE, true);
+    public void setRenderBackground(boolean renderBackground) {
+        this.renderBackground = renderBackground;
+    }
+
+    public void setRenderTopAndBottom(boolean renderTopAndBottom) {
+        this.renderTopAndBottom = renderTopAndBottom;
+    }
+
+    @Override
+    protected void renderListBackground(GuiGraphics guiGraphics) {
+        if (renderBackground) {
+            super.renderListBackground(guiGraphics);
+        }
+    }
+
+    @Override
+    protected void renderListSeparators(GuiGraphics guiGraphics) {
+        if (renderTopAndBottom) {
+            super.renderListSeparators(guiGraphics);
         }
     }
 

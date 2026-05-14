@@ -53,7 +53,7 @@ public class HeightmapWorkUnit extends WorkUnit {
         final int minY = config.onlySampleInVisualRange ? config.heightmapMinY : noiseSettings.minY();
         final int maxY = config.onlySampleInVisualRange ? config.heightmapMaxY : minY + noiseSettings.height();
         final int cellMinY = Mth.floorDiv(minY, noiseSettings.getCellHeight());
-        final int cellCountY = Mth.floorDiv(maxY - minY, noiseSettings.getCellHeight());
+        final int cellCountY = -Mth.floorDiv(minY - maxY, noiseSettings.getCellHeight());
         final int cellOffsetY = config.onlySampleInVisualRange ? cellMinY -  Mth.floorDiv(noiseSettings.minY(), noiseSettings.getCellHeight()): 0;
 
         final int minBlockX = chunkPos.getMinBlockX();
@@ -63,6 +63,7 @@ public class HeightmapWorkUnit extends WorkUnit {
         final int todoArraySize = Math.max(1, cellWidth / sampler.blockStride()) * Math.max(1, cellWidth / sampler.blockStride());
 
         final Predicate<BlockState> predicate = Heightmap.Types.OCEAN_FLOOR_WG.isOpaque();
+        final List<XZPair> positionsToClear = new ArrayList<>();
 
         noiseChunk.initializeForFirstCellX();
 
@@ -91,6 +92,7 @@ public class HeightmapWorkUnit extends WorkUnit {
                         // Iterate over block in cell Y X Z
                         for (int yInCell = cellHeight - 1; yInCell >= 0 && !positions.isEmpty(); --yInCell) {
                             final int y = (cellMinY + cellY) * cellHeight + yInCell;
+                            if (y >= maxY) continue;
                             noiseChunk.updateForY(y, (double) yInCell / (double) cellHeight);
 
                             for (int idx = 0; idx < positions.size(); ++idx) {
@@ -111,6 +113,11 @@ public class HeightmapWorkUnit extends WorkUnit {
                             }
                         }
                     }
+
+                    // Remember unset positions
+                    if (!positions.isEmpty()) {
+                        positionsToClear.addAll(positions);
+                    }
                 }
 
                 // Whatever this does, but it is required...
@@ -118,6 +125,15 @@ public class HeightmapWorkUnit extends WorkUnit {
             }
         } finally {
             noiseChunk.stopInterpolation();
+        }
+
+        // Explicitly set unsampled values to Short.MIN_VALUE
+        // See https://github.com/caeruleusDraconis/world-preview/issues/69
+        if (!res.results().isEmpty()) {
+            for (final XZPair curr : positionsToClear) {
+                mutableBlockPos.set(curr.x, 0, curr.z);
+                sampler.expandRaw(mutableBlockPos, Short.MIN_VALUE, res);
+            }
         }
 
         return List.of(res);

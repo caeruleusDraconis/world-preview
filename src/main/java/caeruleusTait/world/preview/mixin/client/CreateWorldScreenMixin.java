@@ -3,57 +3,50 @@ package caeruleusTait.world.preview.mixin.client;
 import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.client.gui.screens.PreviewTab;
 import net.minecraft.client.gui.components.tabs.Tab;
-import net.minecraft.client.gui.components.tabs.TabNavigationBar;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Arrays;
 
 @Mixin(CreateWorldScreen.class)
 public abstract class CreateWorldScreenMixin {
 
-    @Shadow private @Nullable TabNavigationBar tabNavigationBar;
+    @Unique
+    private PreviewTab world_preview$previewTab;
 
-    private PreviewTab previewTab;
-
-    @Inject(
+    @ModifyArg(
             method = "init",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/worldselection/CreateWorldScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;",
-                    shift = At.Shift.BEFORE
+                    target = "Lnet/minecraft/client/gui/components/tabs/TabNavigationBar$Builder;addTabs([Lnet/minecraft/client/gui/components/tabs/Tab;)Lnet/minecraft/client/gui/components/tabs/TabNavigationBar$Builder;"
             ),
-            slice = @Slice(
-                    from = @At("HEAD"),
-                    to = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/HeaderAndFooterLayout;addToFooter(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;")
-            )
+            index = 0
     )
-    private void appendPreviewTab(CallbackInfo ci) {
-        previewTab = new PreviewTab((CreateWorldScreen) (Object) this, ((ScreenAccessor) this).getMinecraft());
-
-        final TabNavigationBar originalRaw = tabNavigationBar;
-        final TabNavigationBarAccessor original = (TabNavigationBarAccessor)originalRaw;
-
-        tabNavigationBar = TabNavigationBar
-                .builder(original.getTabManager(), original.getWidth())
-                .addTabs(original.getTabs().toArray(new Tab[0]))
-                .addTabs(previewTab)
-                .build();
+    private Tab[] appendPreviewTab(Tab[] originalTabs) {
+        world_preview$previewTab = new PreviewTab((CreateWorldScreen) (Object) this, ((ScreenAccessor) this).getMinecraft());
+        final Tab[] withPreview = Arrays.copyOf(originalTabs, originalTabs.length + 1);
+        withPreview[originalTabs.length] = world_preview$previewTab;
+        return withPreview;
     }
 
     @Inject(method = "popScreen", at = @At("HEAD"))
     private void saveConfigOnClose(CallbackInfo ci) {
-        previewTab.close();
+        if (world_preview$previewTab != null) {
+            world_preview$previewTab.close();
+        }
         WorldPreview.get().saveConfig();
     }
 
     @Inject(method = "onCreate", at = @At("HEAD"))
     private void saveConfigOnCreate(CallbackInfo ci) {
-        previewTab.close();
+        if (world_preview$previewTab != null) {
+            world_preview$previewTab.close();
+        }
         WorldPreview.get().saveConfig();
     }
 

@@ -16,7 +16,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public interface PreviewStorageCacheManager {
 
-    int CACHE_FORMAT_VERSION = 1;
+    int CACHE_FORMAT_VERSION = 2;
 
     PreviewStorage loadPreviewStorage(long seed, int yMin, int yMax);
 
